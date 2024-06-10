@@ -1,0 +1,54 @@
+apiVersion: compliance.openshift.io/v1alpha1
+description: |-
+  Limit Container Capabilities
+  Containers should not enable more capabilites than needed as this opens the door for malicious use. To enable only the required capabilities, the appropriate Security Context Constraints (SCCs) should set capabilities as a list in allowedCapabilities.
+id: xccdf_org.ssgproject.content_rule_scc_limit_container_allowed_capabilities
+instructions: |-
+  Inspect each SCC returned from running the following command:
+  $ oc get scc
+  Next, examine the outputs of the following commands:
+  $ oc describe roles --all-namespaces
+  $ oc describe clusterroles
+  For any role/clusterrole that reference the
+  securitycontextconstraints resource with the resourceNames
+  of the SCCs that do not list an explicit allowedCapabilities, examine the
+  associated rolebindings to account for the users that are bound to the role.
+  Review each SCC and determine that only required capabilities are either
+  completely added as a list entry under allowedCapabilities,
+  or that all the un-required capabilities are dropped for containers and SCCs.
+  varible var_sccs_with_allowed_capabilities_regex can be set to exclude certain
+  SCCs from the check.
+  Use following command to verify if the correct regex is being used, this ouput
+  will list unqualified SCCs:
+  $ oc get scc -o json | [.items[] | select(.metadata.name | test("^privileged$|^hostnetwork-v2$|^restricted-v2$|^nonroot-v2$"; "") | not) | select(.allowedCapabilities != null) | .metadata.name]
+  ^privileged$|^hostnetwork-v2$|^restricted-v2$|^nonroot-v2$ should be replace to the actual value set,
+  either the default one or the one set from TailoredProfile.
+kind: ComplianceCheckResult
+metadata:
+  annotations:
+    compliance.openshift.io/rule: scc-limit-container-allowed-capabilities
+  creationTimestamp: "2023-11-07T18:43:17Z"
+  generation: 1
+  labels:
+    compliance.openshift.io/check-severity: medium
+    compliance.openshift.io/check-status: FAIL
+    compliance.openshift.io/scan-name: ocp4-cis
+    compliance.openshift.io/suite: cis-compliancebind-vz
+  name: ocp4-cis-scc-limit-container-allowed-capabilities
+  namespace: openshift-compliance
+  ownerReferences:
+  - apiVersion: compliance.openshift.io/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ComplianceScan
+    name: ocp4-cis
+    uid: 2f141b5b-3a61-424f-8750-07d1c29494dd
+  resourceVersion: "31911912"
+  uid: 134939fd-cd0c-4325-8cc2-3b69bfae25ec
+rationale: By default, containers run with a default set of capabilities as assigned
+  by the Container Runtime which can include dangerous or highly privileged capabilities.
+  Capabilities should be dropped unless absolutely critical for the container to run
+  software as added capabilities that are not required allow for malicious containers
+  or attackers.
+severity: medium
+status: FAIL
