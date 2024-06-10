@@ -1,1 +1,35 @@
 .\helm template nonprod/dev-chart --dry-run -f dev-values.yaml --set vsad=hxv4 --set env=dev --set appId=app --set serviceAccount.name=ABCD --set tshirt=XL --set greenfield=true --set datacenter=tampa --set datacenter_shortname=tpa --set "labels={abc: def}" --set "annotations={hij: klm}"
+
+
+
+
+curl -X POST \
+--form "variables[NONPROD_OR_PROD]=nonprod" \
+--form "variables[VSAD]=j14v" \
+--form "variables[TSHIRT]=s" \
+--form "variables[DEV]=true" \
+--form "variables[QA]=false" \
+--form "variables[PREPROD]=false" \
+--form "variables[SIT]=false" \
+--form "variables[STG]=false" \
+--form "variables[UAT]=false" \
+--form "variables[GREENFIELD]=false" \
+--form "variables[APP]=annotations" \
+--form "variables[SERVICEACCOUNT]=svc-rhocp" \
+--form "variables[TAMPA_ENABLED]=true" \
+--form "variables[TWINSBURG_ENABLED]=false" \
+--form "variables[SAC_ENABLED]=false" \
+--form "variables[ADMIN_AD_GROUPS]="sdlc_gtsosp_j14v_admin" \
+--form "variables[SKIP_HELM]=false" \
+--form "variables[DEV_AD_GROUPS]=sdlc_gtsosp_j14v_admin" \
+--form "variables[AD_DOMAIN_USWIN]=sdlc_gtsosp_j14v_admin" \
+--form "variables[AD_DOMAIN_ADEBP]=" \
+--form "variables[AD_DOMAIN_EMEA]=" \
+--form "variables[AD_DOMAIN_VDSI]=" \
+--form "variables[DEDICATED_CLUSTER_OC_NAME]=" \
+--form "variables[DEDICATED_CLUSTER_ENABLED]=false" \
+--form "variables[DEDICATED_CLUSTER_URL]=" \
+--form "variables[DEDICATED_CLUSTER_NAME]=" \
+--form "variables[DEDICATED_CLUSTER_SHORTNAME]=" \
+--form "variables[ANNOTATIONS]=verizon.com/support-poc: openshift.admins@verizon.com,test-annotation: some_value" \
+https://gitlab.verizon.com/api/v4/projects/227878/trigger/pipeline\?token\=xyz\&ref\=master
