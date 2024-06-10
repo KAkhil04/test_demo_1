@@ -19,17 +19,17 @@ curl -X POST \
 --form "variables[TAMPA_ENABLED]=true" \
 --form "variables[TWINSBURG_ENABLED]=false" \
 --form "variables[SAC_ENABLED]=false" \
---form "variables[ADMIN_AD_GROUPS]="sdlc_gtsosp_j14v_admin" \
+--form "variables[ADMIN_AD_GROUPS]=sdlc_gtsosp_j14v_admin" \
 --form "variables[SKIP_HELM]=false" \
 --form "variables[DEV_AD_GROUPS]=sdlc_gtsosp_j14v_admin" \
 --form "variables[AD_DOMAIN_USWIN]=sdlc_gtsosp_j14v_admin" \
---form "variables[AD_DOMAIN_ADEBP]=" \
---form "variables[AD_DOMAIN_EMEA]=" \
---form "variables[AD_DOMAIN_VDSI]=" \
---form "variables[DEDICATED_CLUSTER_OC_NAME]=" \
+--form "variables[AD_DOMAIN_ADEBP]=""" \
+--form "variables[AD_DOMAIN_EMEA]=""" \
+--form "variables[AD_DOMAIN_VDSI]=""" \
+--form "variables[DEDICATED_CLUSTER_OC_NAME]=""" \
 --form "variables[DEDICATED_CLUSTER_ENABLED]=false" \
---form "variables[DEDICATED_CLUSTER_URL]=" \
---form "variables[DEDICATED_CLUSTER_NAME]=" \
---form "variables[DEDICATED_CLUSTER_SHORTNAME]=" \
+--form "variables[DEDICATED_CLUSTER_URL]=""" \
+--form "variables[DEDICATED_CLUSTER_NAME]=""" \
+--form "variables[DEDICATED_CLUSTER_SHORTNAME]=""" \
 --form "variables[ANNOTATIONS]=verizon.com/support-poc: openshift.admins@verizon.com,test-annotation: some_value" \
 https://gitlab.verizon.com/api/v4/projects/227878/trigger/pipeline\?token\=xyz\&ref\=master
