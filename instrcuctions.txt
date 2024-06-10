@@ -1,0 +1,49 @@
+[kurelak@tdcldj14va007 ~]$ oc get ccr ocp4-cis-kubelet-configure-event-creation -n openshift-compliance -o yaml
+apiVersion: compliance.openshift.io/v1alpha1
+description: |-
+  Kubelet - Ensure Event Creation Is Configured
+  Security relevant information should be captured. The eventRecordQPS Kubelet option can be used to limit the rate at which events are gathered. Setting this too low could result in relevant events not being logged, however the unlimited setting of 0 could result in a denial of service on the kubelet. Processing and storage systems should be scaled to handle the expected event load. To set the eventRecordQPS option for the kubelet, create a KubeletConfig option along these lines:
+
+  apiVersion: machineconfiguration.openshift.io/v1
+  kind: KubeletConfig
+  metadata:
+    name: kubelet-config-$pool
+  spec:
+     machineConfigPoolSelector:
+         matchLabels:
+             pools.operator.machineconfiguration.openshift.io/$pool_name: ""
+     kubeletConfig:
+         eventRecordQPS: 5
+id: xccdf_org.ssgproject.content_rule_kubelet_configure_event_creation
+instructions: |-
+  Run the following command on the kubelet node(s):
+  $ for NODE_NAME in $(oc get nodes -ojsonpath='{.items[*].metadata.name}'); do oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig|.kind="KubeletConfiguration"|.apiVersion="kubelet.config.k8s.io/v1beta1"' | grep eventRecordQPS; done
+  The output should return .
+kind: ComplianceCheckResult
+metadata:
+  annotations:
+    compliance.openshift.io/rule: kubelet-configure-event-creation
+  creationTimestamp: "2023-11-07T18:43:16Z"
+  generation: 2
+  labels:
+    compliance.openshift.io/automated-remediation: ""
+    compliance.openshift.io/check-severity: medium
+    compliance.openshift.io/check-status: FAIL
+    compliance.openshift.io/scan-name: ocp4-cis
+    compliance.openshift.io/suite: cis-compliancebind-vz
+  name: ocp4-cis-kubelet-configure-event-creation
+  namespace: openshift-compliance
+  ownerReferences:
+  - apiVersion: compliance.openshift.io/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ComplianceScan
+    name: ocp4-cis
+    uid: 2f141b5b-3a61-424f-8750-07d1c29494dd
+  resourceVersion: "266104020"
+  uid: f83f1a52-672d-4ce7-9400-a47e9ed555c9
+rationale: It is important to capture all events and not restrict event creation.
+  Events are an important source of security information and analytics that ensure
+  that your environment is consistently monitored using the event data.
+severity: medium
+status: FAIL
