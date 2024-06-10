@@ -1,0 +1,50 @@
+apiVersion: compliance.openshift.io/v1alpha1
+description: |-
+  Configure OpenShift API Server Maximum Audit Log Size
+  To rotate audit logs upon reaching a maximum size, edit the openshift-apiserver configmap and set the audit-log-maxsize parameter to an appropriate size in MB. For example, to set it to 100 MB:
+
+  "apiServerArguments":{
+   ...
+   "audit-log-maxsize": ["100"],
+   ...
+id: xccdf_org.ssgproject.content_rule_ocp_api_server_audit_log_maxsize
+instructions: |-
+  Run the following command:
+  $ oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments["audit-log-maxsize"]'
+  The output should return a value of ["100"] or as appropriate.
+kind: ComplianceCheckResult
+metadata:
+  annotations:
+    compliance.openshift.io/rule: ocp-api-server-audit-log-maxsize
+  creationTimestamp: "2023-11-07T18:43:12Z"
+  generation: 1
+  labels:
+    compliance.openshift.io/check-has-value: ""
+    compliance.openshift.io/check-severity: medium
+    compliance.openshift.io/check-status: FAIL
+    compliance.openshift.io/scan-name: ocp4-cis
+    compliance.openshift.io/suite: cis-compliancebind-vz
+  name: ocp4-cis-ocp-api-server-audit-log-maxsize
+  namespace: openshift-compliance
+  ownerReferences:
+  - apiVersion: compliance.openshift.io/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ComplianceScan
+    name: ocp4-cis
+    uid: 2f141b5b-3a61-424f-8750-07d1c29494dd
+  resourceVersion: "31911764"
+  uid: ff86682e-c158-4834-85fe-be757b2566c6
+rationale: OpenShift automatically rotates log files. Retaining old log files ensures
+  that OpenShift Operators have sufficient log data available for carrying out any
+  investigation or correlation. If you have set file size of 100 MB and the number
+  of old log files to keep as 10, there would be approximately 1 GB of log data available
+  for use in analysis.
+severity: medium
+status: FAIL
+valuesUsed:
+- var-apiserver-audit-log-maxsize
+[kurelak@tdcldj14va007 ~]$ oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.apiServerArguments["audit-log-maxsize"]'
+[
+  "100"
+]
