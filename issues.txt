@@ -1,35 +1,14 @@
-.\helm template nonprod/dev-chart --dry-run -f dev-values.yaml --set vsad=hxv4 --set env=dev --set appId=app --set serviceAccount.name=ABCD --set tshirt=XL --set greenfield=true --set datacenter=tampa --set datacenter_shortname=tpa --set "labels={abc: def}" --set "annotations={hij: klm}"
-
-
-
-
-curl -X POST \
---form "variables[NONPROD_OR_PROD]=nonprod" \
---form "variables[VSAD]=j14v" \
---form "variables[TSHIRT]=s" \
---form "variables[DEV]=true" \
---form "variables[QA]=false" \
---form "variables[PREPROD]=false" \
---form "variables[SIT]=false" \
---form "variables[STG]=false" \
---form "variables[UAT]=false" \
---form "variables[GREENFIELD]=false" \
---form "variables[APP]=annotations" \
---form "variables[SERVICEACCOUNT]=svc-rhocp" \
---form "variables[TAMPA_ENABLED]=true" \
---form "variables[TWINSBURG_ENABLED]=false" \
---form "variables[SAC_ENABLED]=false" \
---form "variables[ADMIN_AD_GROUPS]=sdlc_gtsosp_j14v_admin" \
---form "variables[SKIP_HELM]=false" \
---form "variables[DEV_AD_GROUPS]=sdlc_gtsosp_j14v_admin" \
---form "variables[AD_DOMAIN_USWIN]=sdlc_gtsosp_j14v_admin" \
---form "variables[AD_DOMAIN_ADEBP]=""" \
---form "variables[AD_DOMAIN_EMEA]=""" \
---form "variables[AD_DOMAIN_VDSI]=""" \
---form "variables[DEDICATED_CLUSTER_OC_NAME]=""" \
---form "variables[DEDICATED_CLUSTER_ENABLED]=false" \
---form "variables[DEDICATED_CLUSTER_URL]=""" \
---form "variables[DEDICATED_CLUSTER_NAME]=""" \
---form "variables[DEDICATED_CLUSTER_SHORTNAME]=""" \
---form "variables[ANNOTATIONS]=verizon.com/support-poc: openshift.admins@verizon.com,test-annotation: some_value" \
-https://gitlab.verizon.com/api/v4/projects/227878/trigger/pipeline\?token\=xyz\&ref\=master
+W0624 14:55:12.035971       1 reflector.go:533] k8s.io/kube-state-metrics/internal/store/builder.go:661: failed to list *v2.HorizontalPodAutoscaler: Get "https://172.30.0.1:443/apis/autoscaling/v2/horizontalpodautoscalers?resourceVersion=567665171": dial tcp 172.30.0.1:443: connect: connection refused
+E0624 14:55:12.036069       1 reflector.go:148] k8s.io/kube-state-metrics/internal/store/builder.go:661: Failed to watch *v2.HorizontalPodAutoscaler: failed to list *v2.HorizontalPodAutoscaler: Get "https://172.30.0.1:443/apis/autoscaling/v2/horizontalpodautoscalers?resourceVersion=567665171": dial tcp 172.30.0.1:443: connect: connection refused
+W0624 14:55:28.731282       1 reflector.go:533] k8s.io/kube-state-metrics/internal/store/builder.go:661: failed to list *v1.StorageClass: Get "https://172.30.0.1:443/apis/storage.k8s.io/v1/storageclasses?resourceVersion=567663967": dial tcp 172.30.0.1:443: connect: connection refused
+E0624 14:55:28.731342       1 reflector.go:148] k8s.io/kube-state-metrics/internal/store/builder.go:661: Failed to watch *v1.StorageClass: failed to list *v1.StorageClass: Get "https://172.30.0.1:443/apis/storage.k8s.io/v1/storageclasses?resourceVersion=567663967": dial tcp 172.30.0.1:443: connect: connection refused
+W0624 14:55:29.367273       1 reflector.go:533] k8s.io/kube-state-metrics/internal/store/builder.go:661: failed to list *v1.Namespace: Get "https://172.30.0.1:443/api/v1/namespaces?resourceVersion=567663279": dial tcp 172.30.0.1:443: connect: connection refused
+E0624 14:55:29.367325       1 reflector.go:148] k8s.io/kube-state-metrics/internal/store/builder.go:661: Failed to watch *v1.Namespace: failed to list *v1.Namespace: Get "https://172.30.0.1:443/api/v1/namespaces?resourceVersion=567663279": dial tcp 172.30.0.1:443: connect: connection refused
+W0624 14:55:29.704721       1 reflector.go:533] k8s.io/kube-state-metrics/internal/store/builder.go:661: failed to list *v1.Service: Get "https://172.30.0.1:443/api/v1/services?resourceVersion=567665022": dial tcp 172.30.0.1:443: connect: connection refused
+E0624 14:55:29.704778       1 reflector.go:148] k8s.io/kube-state-metrics/internal/store/builder.go:661: Failed to watch *v1.Service: failed to list *v1.Service: Get "https://172.30.0.1:443/api/v1/services?resourceVersion=567665022": dial tcp 172.30.0.1:443: connect: connection refused
+W0624 14:55:31.593950       1 reflector.go:533] k8s.io/kube-state-metrics/internal/store/builder.go:661: failed to list *v1.Job: Get "https://172.30.0.1:443/apis/batch/v1/jobs?resourceVersion=567665235": dial tcp 172.30.0.1:443: connect: connection refused
+E0624 14:55:31.594010       1 reflector.go:148] k8s.io/kube-state-metrics/internal/store/builder.go:661: Failed to watch *v1.Job: failed to list *v1.Job: Get "https://172.30.0.1:443/apis/batch/v1/jobs?resourceVersion=567665235": dial tcp 172.30.0.1:443: connect: connection refused
+W0624 14:55:31.947924       1 reflector.go:533] k8s.io/kube-state-metrics/internal/store/builder.go:661: failed to list *v1.LimitRange: Get "https://172.30.0.1:443/api/v1/limitranges?resourceVersion=567663746": dial tcp 172.30.0.1:443: connect: connection refused
+E0624 14:55:31.947976       1 reflector.go:148] k8s.io/kube-state-metrics/internal/store/builder.go:661: Failed to watch *v1.LimitRange: failed to list *v1.LimitRange: Get "https://172.30.0.1:443/api/v1/limitranges?resourceVersion=567663746": dial tcp 172.30.0.1:443: connect: connection refused
+W0624 14:55:32.152868       1 reflector.go:533] k8s.io/kube-state-metrics/internal/store/builder.go:661: failed to list *v1.CertificateSigningRequest: Get "https://172.30.0.1:443/apis/certificates.k8s.io/v1/certificatesigningrequests?resourceVersion=567663039": dial tcp 172.30.0.1:443: connect: connection refused
+E0624 14:55:32.152931       1 reflector.go:148] k8s.io/kube-state-metrics/internal/store/builder.go:661: Failed to watch *v1.CertificateSigningRequest: failed to list *v1.CertificateSigningRequest: Get "https://172.30.0.1:443/apis/certificates.k8s.io/v1/certificatesigningrequests?resourceVersion=567663039": dial tcp 172.30.0.1:443: connect: connection refused
