@@ -1,1 +1,1 @@
-curl -G 'http://localhost:9091/api/v1/query' --data-urlencode 'query=sum(rate(container_cpu_usage_seconds_total[5m]))'
+curl -k -G 'https://localhost:9091/api/v1/query' --data-urlencode 'query=sum(rate(container_cpu_usage_seconds_total[5m]))'
