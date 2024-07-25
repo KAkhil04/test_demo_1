@@ -1,1 +1,1 @@
-curl -k -G 'https://localhost:9091/api/v1/query' --data-urlencode 'query=sum(rate(container_cpu_usage_seconds_total[5m]))'
+ts=2024-07-25T16:00:09.893Z caller=klog.go:116 level=error component=k8s_client_runtime func=ErrorDepth msg="github.com/prometheus/prometheus/discovery/kubernetes/kubernetes.go:548: Failed to watch *v1.Pod: failed to list *v1.Pod: pods is forbidden: User \"system:serviceaccount:openshift-monitoring:prometheus-k8s\" cannot list resource \"pods\" in API group \"\" in the namespace \"proactive-node-scaling-operator\""
