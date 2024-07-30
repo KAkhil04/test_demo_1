@@ -1,3 +1,6 @@
-Red Hat OpenShift Distributed Tracing Platform (provided by Red Hat) version 1.39.0-3 - Current deployed version: 1.57.0-7
-Kiali Operator (provided by Red Hat) version 1.57.3 - Kiali is present but not deployed as an operator
-Red Hat OpenShift Service Mesh (provided by Red Hat) version 2.3.0 - This cannot be installed
+2024-07-24T20:41:02.464977Z info install Copied istio-cni to /host/opt/cni/bin.
+
+2024-07-24T20:41:02.465040Z info install Directory /host/secondary-bin-dir is not writable, skipping.
+
+2024-07-24T20:41:02.467598Z info install write kubeconfig file /host/etc/cni/net.d/ZZZ-istio-cni-kubeconfig with:
+
