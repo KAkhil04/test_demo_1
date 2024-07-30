@@ -1,3 +1,3 @@
-Red Hat OpenShift distributed tracing platform (provided by Red Hat) (1.39.0-3)* - Current deployed version (1.57.0-7)
-Kiali Operator (provided by Red Hat) (1.57.3)* - Kiali present but not deployed as an operator
-Red Hat OpenShift Service Mesh (provided by Red Hat) (2.3.0)* - This can't be installed
+Red Hat OpenShift Distributed Tracing Platform (provided by Red Hat) version 1.39.0-3 - Current deployed version: 1.57.0-7
+Kiali Operator (provided by Red Hat) version 1.57.3 - Kiali is present but not deployed as an operator
+Red Hat OpenShift Service Mesh (provided by Red Hat) version 2.3.0 - This cannot be installed
