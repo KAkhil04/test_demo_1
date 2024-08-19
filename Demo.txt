@@ -1,3 +1,28 @@
 curl -X POST https://gitlab.com/api/v4/projects/227878/trigger/pipeline \
      -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "token=glptt-8f4574eb7a0f057350b2a71f84a3a8a211a65dae&ref=master&variables[NONPROD_OR_PROD]=nonprod&variables[TSHIRT]=xxl&variables[VSAD]=b6vv&variables[DEV]=true&variables[QA]=false&variables[SIT]=false&variables[STG]=false&variables[UAT]=false&variables[PREPROD]=false&variables[GREENFIELD]=false&variables[APP]=vbg&variables[SERVICEACCOUNT]=tdc-b6vv-dev-vbg-ocp-sa&variables[TAMPA_ENABLED]=false&variables[TWINSBURG_ENABLED]=true&variables[SAC_ENABLED]=false&variables[ADMIN_AD_GROUPS]=vbg_kube_prod_b6vv_admin,vbg_kube_prod_b6vv_admin_vdsi&variables[DEV_AD_GROUPS]=vbg_kube_prod_b6vv_view,vbg_kube_prod_b6vv_view_vdsi&variables[AD_DOMAIN_USWIN]=vbg_kube_prod_b6vv_admin,vbg_kube_prod_b6vv_view&variables[AD_DOMAIN_ADEBP]=&variables[AD_DOMAIN_EMEA]=&variables[AD_DOMAIN_VDSI]=vbg_kube_prod_b6vv_admin_vdsi,vbg_kube_prod_b6vv_view&variables[UUID]=&variables[ANNOTATIONS]=vzw-sre-platformdesign@verizon.com&variables[DEDICATED_CLUSTER_ENABLED]=false"
+     -d "token=glptt-8f4574eb7a0f057350b2a71f84a3a8a211a65dae" \
+     -d "ref=master" \
+     -d "variables[NONPROD_OR_PROD]=nonprod" \
+     -d "variables[TSHIRT]=xxl" \
+     -d "variables[VSAD]=b6vv" \
+     -d "variables[DEV]=true" \
+     -d "variables[QA]=false" \
+     -d "variables[SIT]=false" \
+     -d "variables[STG]=false" \
+     -d "variables[UAT]=false" \
+     -d "variables[PREPROD]=false" \
+     -d "variables[GREENFIELD]=false" \
+     -d "variables[APP]=vbg" \
+     -d "variables[SERVICEACCOUNT]=tdc-b6vv-dev-vbg-ocp-sa" \
+     -d "variables[TAMPA_ENABLED]=false" \
+     -d "variables[TWINSBURG_ENABLED]=true" \
+     -d "variables[SAC_ENABLED]=false" \
+     -d "variables[ADMIN_AD_GROUPS]=vbg_kube_prod_b6vv_admin,vbg_kube_prod_b6vv_admin_vdsi" \
+     -d "variables[DEV_AD_GROUPS]=vbg_kube_prod_b6vv_view,vbg_kube_prod_b6vv_view_vdsi" \
+     -d "variables[AD_DOMAIN_USWIN]=vbg_kube_prod_b6vv_admin,vbg_kube_prod_b6vv_view" \
+     -d "variables[AD_DOMAIN_ADEBP]=" \
+     -d "variables[AD_DOMAIN_EMEA]=" \
+     -d "variables[AD_DOMAIN_VDSI]=vbg_kube_prod_b6vv_admin_vdsi,vbg_kube_prod_b6vv_view" \
+     -d "variables[UUID]=" \
+     -d "variables[ANNOTATIONS]=vzw-sre-platformdesign@verizon.com" \
+     -d "variables[DEDICATED_CLUSTER_ENABLED]=false"
