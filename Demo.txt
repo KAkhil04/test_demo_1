@@ -1,1 +1,30 @@
-Hello World
+{
+   "ref":"master",
+   "variables":{
+      "NONPROD_OR_PROD":"nonprod",
+      "TSHIRT":"xxl",
+      "VSAD":"b6vv",
+      "DEV":"true",
+      "QA":"false",
+      "SIT":"false",
+      "STG":"false",
+      "UAT":"false",
+      "PREPROD":"false",
+      "GREENFIELD":"false",
+      "APP":"vbg",
+      "SERVICEACCOUNT":"tdc-b6vv-dev-vbg-ocp-sa",
+      "TAMPA_ENABLED":"false",
+      "TWINSBURG_ENABLED":"true",
+      "SAC_ENABLED":"false",
+      "ADMIN_AD_GROUPS":"vbg_kube_prod_b6vv_admin,vbg_kube_prod_b6vv_admin_vdsi",
+      "DEV_AD_GROUPS":"vbg_kube_prod_b6vv_view,vbg_kube_prod_b6vv_view_vdsi",
+      "AD_DOMAIN_USWIN":"vbg_kube_prod_b6vv_admin,vbg_kube_prod_b6vv_view",
+      "AD_DOMAIN_ADEBP":"",
+      "AD_DOMAIN_EMEA":"",
+      "AD_DOMAIN_VDSI":"vbg_kube_prod_b6vv_admin_vdsi,vbg_kube_prod_b6vv_view",
+      "UUID":"",
+      "ANNOTATIONS":"vzw-sre-platformdesign@verizon.com",
+      "DEDICATED_CLUSTER_ENABLED":"false"
+   },
+   "id":"227878"
+}
