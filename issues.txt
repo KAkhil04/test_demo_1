@@ -1,6 +1,12 @@
-2024-07-24T20:41:02.464977Z info install Copied istio-cni to /host/opt/cni/bin.
-
-2024-07-24T20:41:02.465040Z info install Directory /host/secondary-bin-dir is not writable, skipping.
-
-2024-07-24T20:41:02.467598Z info install write kubeconfig file /host/etc/cni/net.d/ZZZ-istio-cni-kubeconfig with:
-
+[kurelak@tdcldj14va007 ~]$ oc api-resources | grep compliance
+compliancecheckresults                    ccr,checkresults,checkresult                                                           compliance.openshift.io/v1alpha1                   true         ComplianceCheckResult
+complianceremediations                    cr,remediations,remediation,rems                                                       compliance.openshift.io/v1alpha1                   true         ComplianceRemediation
+compliancescans                           scans,scan                                                                             compliance.openshift.io/v1alpha1                   true         ComplianceScan
+compliancesuites                          suites,suite                                                                           compliance.openshift.io/v1alpha1                   true         ComplianceSuite
+profilebundles                            pb                                                                                     compliance.openshift.io/v1alpha1                   true         ProfileBundle
+profiles                                  profs,prof                                                                             compliance.openshift.io/v1alpha1                   true         Profile
+rules                                                                                                                            compliance.openshift.io/v1alpha1                   true         Rule
+scansettingbindings                       ssb                                                                                    compliance.openshift.io/v1alpha1                   true         ScanSettingBinding
+scansettings                              ss                                                                                     compliance.openshift.io/v1alpha1                   true         ScanSetting
+tailoredprofiles                          tp,tprof                                                                               compliance.openshift.io/v1alpha1                   true         TailoredProfile
+variables                                 var                                                                                    compliance.openshift.io/v1alpha1                   true         Variable
