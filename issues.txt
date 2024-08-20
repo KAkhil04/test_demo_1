@@ -1,12 +1,10 @@
-[kurelak@tdcldj14va007 ~]$ oc api-resources | grep compliance
-compliancecheckresults                    ccr,checkresults,checkresult                                                           compliance.openshift.io/v1alpha1                   true         ComplianceCheckResult
-complianceremediations                    cr,remediations,remediation,rems                                                       compliance.openshift.io/v1alpha1                   true         ComplianceRemediation
-compliancescans                           scans,scan                                                                             compliance.openshift.io/v1alpha1                   true         ComplianceScan
-compliancesuites                          suites,suite                                                                           compliance.openshift.io/v1alpha1                   true         ComplianceSuite
-profilebundles                            pb                                                                                     compliance.openshift.io/v1alpha1                   true         ProfileBundle
-profiles                                  profs,prof                                                                             compliance.openshift.io/v1alpha1                   true         Profile
-rules                                                                                                                            compliance.openshift.io/v1alpha1                   true         Rule
-scansettingbindings                       ssb                                                                                    compliance.openshift.io/v1alpha1                   true         ScanSettingBinding
-scansettings                              ss                                                                                     compliance.openshift.io/v1alpha1                   true         ScanSetting
-tailoredprofiles                          tp,tprof                                                                               compliance.openshift.io/v1alpha1                   true         TailoredProfile
-variables                                 var                                                                                    compliance.openshift.io/v1alpha1                   true         Variable
+I am currently using OpenShift Container Platform version 4.14.16 and I need assistance with permanently ignoring specific compliance check results in OpenShift Compliance.
+
+I have identified certain compliance check results that are not relevant to our environment because we have other controls, such as Gatekeeper, in place. I would like to exclude these checks from future compliance scans. I have attempted to create a ComplianceRemediation resource to ignore these checks, but I need confirmation on the correct procedure and any potential impacts this might have on our compliance reporting.
+
+Could you please provide detailed steps or best practices for permanently ignoring specific compliance check results? Additionally, any documentation or examples would be greatly appreciated.
+
+Thank you for your assistance.
+
+Best regards,
+[Your Name]
