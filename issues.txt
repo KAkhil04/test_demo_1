@@ -1,10 +1,10 @@
-I am currently using OpenShift Container Platform version 4.14.16 and I need assistance with permanently ignoring specific compliance check results in OpenShift Compliance.
+[kurelak@tdcldj14va001 ~]$ oc get events -n openshift-compliance
+LAST SEEN   TYPE      REASON               OBJECT                                            MESSAGE
+29m         Normal    ResultAvailable      compliancesuite/cis-compliancebind-vz-new-jj      The result is: ERROR
+29m         Normal    ResultAvailable      scansettingbinding/cis-compliancebind-vz-new-jj   The result is: ERROR
+29m         Normal    ResultAvailable      scansettingbinding/cis-compliancebind-vz          The result is: ERROR
+29m         Normal    ResultAvailable      compliancesuite/cis-compliancebind-vz             The result is: ERROR
+5m2s        Warning   ProvisioningFailed   persistentvolumeclaim/ocp4-cis-node-master        storageclass.storage.k8s.io "slow" not found
+5m2s        Warning   ProvisioningFailed   persistentvolumeclaim/ocp4-cis-node-worker        storageclass.storage.k8s.io "slow" not found
+5m2s        Warning   ProvisioningFailed   persistentvolumeclaim/ocp4-cis                    storageclass.storage.k8s.io "slow" not found
 
-I have identified certain compliance check results that are not relevant to our environment because we have other controls, such as Gatekeeper, in place. I would like to exclude these checks from future compliance scans. I have attempted to create a ComplianceRemediation resource to ignore these checks, but I need confirmation on the correct procedure and any potential impacts this might have on our compliance reporting.
-
-Could you please provide detailed steps or best practices for permanently ignoring specific compliance check results? Additionally, any documentation or examples would be greatly appreciated.
-
-Thank you for your assistance.
-
-Best regards,
-[Your Name]
