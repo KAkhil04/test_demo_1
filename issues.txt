@@ -1,1 +1,9 @@
-admission webhook "validation.gatekeeper.sh" denied the request: [psp-readonlyrootfilesystem] only read-only root filesystem container is allowed: app
+Intent: Space Alert ingestion into Prod C-Ops using Production Webhook
+
+Prometheus instance to:
+thanos-querier-openshift-monitoring.apps.sacpdocpspa02j14v.verizon.com
+thanos-querier-openshift-monitoring.apps.tdcpdocpspaj14v.verizon.com
+thanos-querier-openshift-monitoring.apps.tdcpdocpspa02j14v.verizon.com
+
+Webhook end point:
+http://oneops-webhook.nss.vzwnet.com:8080/prometheus
