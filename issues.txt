@@ -1,1 +1,22 @@
-Failed to create pod sandbox: rpc error: code = Unknown desc = failed to create pod network sandbox k8s_kafka-9_h4sv-prod-kafka_abef97c5-e7ae-46dc-81c1-1153f039ff9f_0(d5b01f3bc1c60d54bd592cbe0a1786cfc6b559a56cffdca0dcb29d61dde777e6): error adding pod h4sv-prod-kafka_kafka-9 to CNI network "multus-cni-network": plugin type="multus-shim" name="multus-cni-network" failed (add): CmdAdd (shim): failed to send CNI request: Post "http://dummy/cni": dial unix /run/multus/socket/multus.sock: connect: no such file or directory
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: poc-dev-customscale
+  namespace: nt4v-dev-ntls
+spec:
+  scaleTargetRef:
+    name: poc-dev
+  minReplicaCount: 2
+  maxReplicaCount: 6
+  pollingInterval: 10  # How often KEDA will poll Prometheus, in seconds
+  cooldownPeriod:  60  # Period to wait after the last trigger reported active before scaling back down, in seconds
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-operated.openshift-user-workload-monitoring.svc:9090
+      metricName: http_server_requests_seconds_count_above_100 # Custom metric name to use in HPA
+      threshold: "100" # Threshold value to trigger scaling
+      query: >- # Prometheus query to fetch the metric
+          sum(rate(http_server_requests_seconds_count{application="poc",error="none",exception="none",method="GET",outcome="SUCCESS",status="200",uri="/service/delay/{requestStr}"}[1m]))
+    authenticationRef:
+      name: keda-trigger-auth-nt4v
