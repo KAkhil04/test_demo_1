@@ -1,77 +1,29 @@
-apiVersion: v1
-kind: Service
-metadata:
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "80"
-    prometheus.io/path: "/actuator/prometheus"
-  labels:
-    app_domain: infrastructure
-    app_name: poc
-    project.app: poc-dev
-    project.lob: nts
-    project.name: poc
-    project.vsad: nt4v
-  name: poc
-  namespace: nt4v-dev-ntls
-spec:
-  ports:
-  - name: portdetails
-    port: 80
-    protocol: TCP
-    targetPort: 8080
-  selector:
-    project.app: poc-dev
-    project.name: poc
-  sessionAffinity: None
-  type: ClusterIP
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: poc-service-monitor
-  namespace: openshift-user-workload-monitoring
-  labels:
-    app_domain: infrastructure
-    app_name: poc
-    project.app: poc-dev
-    project.lob: nts
-    project.name: poc
-    project.vsad: nt4v
-spec:
-  selector:
-    matchLabels:
-      project.app: poc-dev
-      project.name: poc
-  endpoints:
-  - port: portdetails
-    path: /actuator/prometheus
-    interval: 5s
-  namespaceSelector:
-    matchNames:
-    - nt4v-dev-ntls
----
-apiVersion: monitoring.coreos.com/v1
-kind: PodMonitor
-metadata:
-  name: poc-pod-monitor
-  namespace: openshift-user-workload-monitoring
-  labels:
-    app_domain: infrastructure
-    app_name: poc
-    project.app: poc-dev
-    project.lob: nts
-    project.name: poc
-    project.vsad: nt4v
-spec:
-  selector:
-    matchLabels:
-      project.app: poc-dev
-      project.name: poc
-  podMetricsEndpoints:
-  - path: /actuator/prometheus
-    interval: 10s
-    port: http
-  namespaceSelector:
-    matchNames:
-    - nt4v-dev-ntls
+#!/bin/bash
+
+# Log in to the OpenShift cluster
+# oc login <API_URL> --token=<TOKEN>
+
+# Get the list of all namespaces
+namespaces=$(oc get namespaces -o jsonpath='{.items[*].metadata.name}')
+
+# Iterate over each namespace to find installed operators
+for namespace in $namespaces; do
+  echo "Checking namespace: $namespace"
+  
+  # Get the list of ClusterServiceVersions (CSVs) in the namespace
+  csvs=$(oc get csv -n $namespace -o jsonpath='{.items[*].metadata.name}')
+  
+  for csv in $csvs; do
+    # Get the current version of the operator
+    current_version=$(oc get csv $csv -n $namespace -o jsonpath='{.spec.version}')
+    
+    # Get the available upgradable version of the operator
+    upgradable_version=$(oc get csv $csv -n $namespace -o jsonpath='{.status.replaces}')
+    
+    # Print the current and upgradable versions
+    echo "Operator: $csv"
+    echo "Current Version: $current_version"
+    echo "Upgradable Version: $upgradable_version"
+    echo "-----------------------------------"
+  done
+done
