@@ -1,32 +1,11 @@
-#!/bin/bash
+Today, our Grafana dashboards are protected by oauth and the global dashboards are tied to the ACM clusters. We can't give everyone access to ACM, nor would we want to. But, we want anybody to be able to view the dashboards. I think we can only do this for Grafana, not what's built into the OCP web console.
+The end goal is for anyone to be able to view a dashboard, but edit is still protected by oauth and tied to our cluster-admin adom group.
 
-# Log in to the OpenShift cluster
-oc login <API_URL> --token=<TOKEN>
-
-# Get the list of all namespaces
-namespaces=$(oc get namespaces -o jsonpath='{.items[*].metadata.name}')
-
-# Iterate over each namespace to find installed operators
-for namespace in $namespaces; do
-  echo "Checking namespace: $namespace"
-  
-  # Get the list of ClusterServiceVersions (CSVs) in the namespace
-  csvs=$(oc get csv -n $namespace -o jsonpath='{.items[*].metadata.name}')
-  
-  for csv in $csvs; do
-    # Get the current version of the operator
-    current_version=$(oc get csv $csv -n $namespace -o jsonpath='{.spec.version}')
-    
-    # Get the operator name from the CSV name
-    operator_name=$(oc get csv $csv -n $namespace -o jsonpath='{.spec.displayName}')
-    
-    # Get the available stable version of the operator
-    stable_version=$(oc get packagemanifest $operator_name -o jsonpath='{.status.channels[?(@.name=="stable")].currentCSVDesc.version}')
-    
-    # Print the current and stable versions
-    echo "Operator: $operator_name"
-    echo "Current Version: $current_version"
-    echo "Stable Version: $stable_version"
-    echo "-----------------------------------"
-  done
-done
+for example, this is our ESX capacity dashboard: https://grafana-route-grafana.apps.tpanpacmj14v.ebiz.verizon.com/d/JSqcRuXSz/cluster-capacity-v3?orgId=1
+if our finance people want to see it so they can look for funding to buy more, they should be able to. today we have to send them screenshots.
+1:26
+how's later today? :slightly_smiling_face:
+1:26
+otherwise, no.
+1:27
+however, here is my big picture vision. if the enterprise command center can look at our dashboards to see if a cluster is healthy, it might help prevent us from getting late night calls when app teams want us to fix their application issues that aren't really platform-related.
