@@ -1,49 +1,73 @@
-[kurelak@tdcldj14va007 ~]$ oc get ccr ocp4-cis-kubelet-configure-event-creation -n openshift-compliance -o yaml
-apiVersion: compliance.openshift.io/v1alpha1
-description: |-
-  Kubelet - Ensure Event Creation Is Configured
-  Security relevant information should be captured. The eventRecordQPS Kubelet option can be used to limit the rate at which events are gathered. Setting this too low could result in relevant events not being logged, however the unlimited setting of 0 could result in a denial of service on the kubelet. Processing and storage systems should be scaled to handle the expected event load. To set the eventRecordQPS option for the kubelet, create a KubeletConfig option along these lines:
+Console log::
 
-  apiVersion: machineconfiguration.openshift.io/v1
-  kind: KubeletConfig
-  metadata:
-    name: kubelet-config-$pool
-  spec:
-     machineConfigPoolSelector:
-         matchLabels:
-             pools.operator.machineconfiguration.openshift.io/$pool_name: ""
-     kubeletConfig:
-         eventRecordQPS: 5
-id: xccdf_org.ssgproject.content_rule_kubelet_configure_event_creation
-instructions: |-
-  Run the following command on the kubelet node(s):
-  $ for NODE_NAME in $(oc get nodes -ojsonpath='{.items[*].metadata.name}'); do oc get --raw /api/v1/nodes/$NODE_NAME/proxy/configz | jq '.kubeletconfig|.kind="KubeletConfiguration"|.apiVersion="kubelet.config.k8s.io/v1beta1"' | grep eventRecordQPS; done
-  The output should return .
-kind: ComplianceCheckResult
-metadata:
-  annotations:
-    compliance.openshift.io/rule: kubelet-configure-event-creation
-  creationTimestamp: "2023-11-07T18:43:16Z"
-  generation: 2
-  labels:
-    compliance.openshift.io/automated-remediation: ""
-    compliance.openshift.io/check-severity: medium
-    compliance.openshift.io/check-status: FAIL
-    compliance.openshift.io/scan-name: ocp4-cis
-    compliance.openshift.io/suite: cis-compliancebind-vz
-  name: ocp4-cis-kubelet-configure-event-creation
-  namespace: openshift-compliance
-  ownerReferences:
-  - apiVersion: compliance.openshift.io/v1alpha1
-    blockOwnerDeletion: true
-    controller: true
-    kind: ComplianceScan
-    name: ocp4-cis
-    uid: 2f141b5b-3a61-424f-8750-07d1c29494dd
-  resourceVersion: "266104020"
-  uid: f83f1a52-672d-4ce7-9400-a47e9ed555c9
-rationale: It is important to capture all events and not restrict event creation.
-  Events are an important source of security information and analytics that ensure
-  that your environment is consistently monitored using the event data.
-severity: medium
-status: FAIL
+
+Running with gitlab-runner 13.10.0~beta.65.g074336fb (074336fb)
+  on gitlab-runner-68669c77c7-m2px8 3Lg_m5yc
+Resolving secrets
+00:00
+Preparing the "kubernetes" executor
+00:00
+Using Kubernetes namespace: gitlab-system
+WARNING: Pulling GitLab Runner helper image from Docker Hub. Helper image is migrating to registry.gitlab.com, for more information see https://docs.gitlab.com/runner/configuration/advanced-configuration.html#migrating-helper-image-to-registrygitlabcom
+Using Kubernetes executor with image docker-remote.oneartifactoryci.verizon.com/alpine/git:latest ...
+Preparing environment
+00:04
+Waiting for pod gitlab-system/runner-3lgm5yc-project-227878-concurrent-085rwt to be running, status is Pending
+Running on runner-3lgm5yc-project-227878-concurrent-085rwt via gitlab-runner-68669c77c7-m2px8...
+Getting source from Git repository
+00:01
+Fetching changes with git depth set to 20...
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /tmp/gts-openshift/onboarding-pipline/.git/
+Created fresh repository.
+Checking out b3e53aa1 as OCP-3434...
+Skipping Git submodules setup
+Downloading artifacts
+00:04
+Downloading artifacts for helm_dev (35712165)...
+ERROR: Downloading artifacts from coordinator... error couldn't execute GET against https://gitlab.verizon.com/api/v4/jobs/35712165/artifacts?direct_download=true: Get "https://vz-app-gts-h32v-prod-gitlab-artifacts-west-s3bucket.s3.us-west-2.amazonaws.com/b0/ed/b0ed515aba748e236ffbfa581bedcfb53ea0d00fa16835dfa9210cd282cc1f03/%40final/a0/24/7484e3a25bc25a1e267916cc2a539effe8c4332fe9b8fe9c53ec794838b5?X-Amz-Expires=600&X-Amz-Date=20241031T152129Z&X-Amz-Security-Token=[FILTERED]&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=[FILTERED]&X-Amz-SignedHeaders=host&X-Amz-Signature=[FILTERED] read tcp 10.129.0.144:39022->52.92.191.98:443: read: connection reset by peer  id=35712165 token=64_GUTDs
+WARNING: Retrying...                                error=invalid argument
+Downloading artifacts from coordinator... ok        id=35712165 responseStatus=200 OK token=64_GUTDs
+Downloading artifacts for helm_argo_app (35712166)...
+ERROR: Downloading artifacts from coordinator... error couldn't execute GET against https://gitlab.verizon.com/api/v4/jobs/35712166/artifacts?direct_download=true: Get "https://vz-app-gts-h32v-prod-gitlab-artifacts-west-s3bucket.s3.us-west-2.amazonaws.com/b0/ed/b0ed515aba748e236ffbfa581bedcfb53ea0d00fa16835dfa9210cd282cc1f03/%40final/7f/2f/aa1853485cc6d1f11c846abd164a485cf4b3c23e342a4e16328f1e999774?X-Amz-Expires=600&X-Amz-Date=20241031T152131Z&X-Amz-Security-Token=[FILTERED]&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=[FILTERED]&X-Amz-SignedHeaders=host&X-Amz-Signature=[FILTERED] read tcp 10.129.0.144:39034->52.92.191.98:443: read: connection reset by peer  id=35712166 token=64_GUTDs
+WARNING: Retrying...                                error=invalid argument
+Downloading artifacts from coordinator... ok        id=35712166 responseStatus=200 OK token=64_GUTDs
+Executing "step_script" stage of the job script
+00:02
+$ echo $ENV
+dev
+$ cd nonprod/output/
+$ ls
+Dedicated
+ocp-test-nonprod-Dedicated.yaml
+$ git config --global user.email "Openshift.admins@verizon.com@verizon.com"
+Cloning into 'onboarding_gitops_manifests_nonprod'...
+$ git config --global user.name "onboardingpipeline-bot"
+$ git clone https://oauth2:$NONPROD_ACCESS_TOKEN@$MANIFEST_REPO
+$ ls
+Dedicated
+ocp-test-nonprod-Dedicated.yaml
+onboarding_gitops_manifests_nonprod
+$ cd onboarding_gitops_manifests_nonprod/groupsync/groups
+grep: sacpdocpspa02j14v-uswin.data: No such file or directory
+$ export IFS="," # collapsed multi-line command
+grep: sacpdocpspa02j14v-uswin.data: No such file or directory
+adding SDLC_KUBE_NONPROD_TEST_ADMIN
+cp: can't create 'onboarding_gitops_manifests_nonprod/Dedicated/sacpdocpspa02j14v/argoApps/': Is a directory
+empty file, adding SDLC_KUBE_NONPROD_TEST_ADMIN
+adding SDLC_KUBE_NONPROD_TEST_VIEW
+$ cd ../../..
+$ cp -r $DATA_CENTER/$CLUSTER_OC_NAME/$VSAD onboarding_gitops_manifests_nonprod/$DATA_CENTER/$CLUSTER_OC_NAME
+$ cp $VSAD-$APP-nonprod-$DATA_CENTER.yaml onboarding_gitops_manifests_nonprod/$DATA_CENTER/$CLUSTER_OC_NAME/argoApps/
+Cleaning up file based variables
+00:00
+ERROR: Job failed: command terminated with exit code 1
