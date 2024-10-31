@@ -1,0 +1,286 @@
+stages:
+  - helm_dev
+  - helm_qa
+  - helm_sit
+  - helm_stg
+  - helm_uat
+  - helm_pre_prod
+  - helm_argo_app
+  - group_sync_and_git_push
+
+  
+variables:
+  TAMPA_NAME: "Tampa"
+  SAC_NAME: "Sacramento"
+  TWINSBURG_NAME: "Twinsburg"
+  MANIFEST_REPO: "gitlab.verizon.com/gts-openshift/onboarding_gitops_manifests_nonprod.git"
+  SPOKE_SECRET_NS: appdev-gitops
+
+.helm_template:
+  image: 
+    name: docker-remote.oneartifactoryci.verizon.com/alpine/helm:3.10.2
+    entrypoint: [""]
+  needs:
+    - pipeline: $ROOT_PIPELINE
+      job: getUUID
+  after_script:
+    - UUID=$(cat ./uuid.txt)
+    - echo $ENV # ENV holds dev, qa, sit, stg, uat
+    - echo $TSHIRT
+    - echo $VSAD
+    - echo $APP
+    - echo $SERVICEACCOUNT
+    - echo $DATA_CENTER
+    - echo $DATA_CENTER_URL
+    - echo $DEV_AD_GROUPSx
+    - echo $ADMIN_AD_GROUPSx
+    - cd nonprod 
+    - helm template $ENV-chart 
+     --dry-run -f $ENV-values.yaml 
+     --output-dir ./output/$DATA_CENTER/$VSAD/$APP/$ENV './' 
+     --set vsad=$VSAD
+     --set env=$ENV
+     --set appId=$APP 
+     --set serviceAccount.name=$SERVICEACCOUNT
+     --set tshirt=$TSHIRT
+     --set greenfield=$GREENFIELD
+     --set datacenter=$DATA_CENTER
+     --set datacenter_shortname=$DATA_CENTER_SHORT_NAME
+     --set datacenter_url=$DATA_CENTER_URL
+     --set "rolebindings.admin.subjects.name={$ADMIN_AD_GROUPSx}"
+     --set "rolebindings.dev.subjects.name={$DEV_AD_GROUPSx}"
+     --set uuid=$UUID
+     --set serviceAccountSecretNS=$SPOKE_SECRET_NS
+     --set "labels={$LABELSx}"
+     --set "annotations={$ANNOTATIONSx}"
+     #helm creates onboarding-pipeline folder, need to move newly created files out of that and into /vsad/app/env folder. then remove the onboarding-pipeline folder.
+    - mv ./output/$DATA_CENTER/$VSAD/$APP/$ENV/onboarding-pipeline/templates/* ./output/$DATA_CENTER/$VSAD/$APP/$ENV && rm -r ./output/$DATA_CENTER/$VSAD/$APP/$ENV/onboarding-pipeline/
+    - cd ./output/$DATA_CENTER/$VSAD/$APP/$ENV
+    - ls
+    - pwd
+    - echo "removing argoRootApp.yaml will be created later"
+    - rm argoRootApp.yaml
+    - echo "renaming argoEnvApp.yaml to $VSAD-$ENV-$APP.yaml"
+    - mv argoEnvApp.yaml $VSAD-$ENV-$APP.yaml
+    - cd ..
+    - ls -ltra
+    - mv $ENV/$VSAD-$ENV-$APP.yaml . #for some reason, mving with pathing doesn't work here.
+  artifacts:
+    name: "output"
+    untracked: true
+    paths:
+      - output
+      - ./uuid.txt 
+
+helm_argo_app:
+  stage: helm_argo_app
+  image: 
+    name: docker-remote.oneartifactoryci.verizon.com/alpine/helm:3.10.2
+    entrypoint: [""]
+  script:
+    - cd nonprod ##
+    - helm template argoapp-chart 
+     --dry-run -f $ENV-values.yaml './' 
+     --show-only templates/argoRootApp.yaml
+     --set vsad=$VSAD
+     --set env=$ENV
+     --set appId=$APP 
+     --set serviceAccount.name=$SERVICEACCOUNT 
+     --set tshirt=$TSHIRT 
+     --set serviceAccountSecretNS=$SPOKE_SECRET_NS
+     --set datacenter_url=$DATA_CENTER_URL
+     --set greenfield=$GREENFIELD --set datacenter=$DATA_CENTER --set datacenter_shortname=$DATA_CENTER_SHORT_NAME --set uuid=$UUID > ./output/$VSAD-$APP-nonprod-$DATA_CENTER.yaml
+     #helm creates onboarding-pipeline folder, need to move newly created files out of that and into /vsad/app/env folder. then remove the onboarding-pipeline folder.
+  artifacts:
+    name: "output"
+    untracked: true
+    paths:
+      - output
+      - ./uuid.txt 
+
+group_sync_and_git_push:
+  stage: group_sync_and_git_push
+  image: 
+    name: docker-remote.oneartifactoryci.verizon.com/alpine/git:latest
+    entrypoint: [""]
+  script:
+    - echo $ENV
+    - cd nonprod/output/ #$DATA_CENTER
+    - ls
+    - git config --global user.email "Openshift.admins@verizon.com@verizon.com"
+    - git config --global user.name "onboardingpipeline-bot"
+    - git clone https://oauth2:$NONPROD_ACCESS_TOKEN@$MANIFEST_REPO
+    - ls
+    - cd onboarding_gitops_manifests_nonprod/groupsync/groups
+    # For each AD group, check file if exists. if it does not exist, add the group to the file
+    # helm treats whitespaces as a group, so need to be aware of that.
+    # if [ -z $(grep '[^[:space:]]' $file) ]; then ### check for empty or only has whitespaces in file
+    # echo -e "$(cat $file)$nl$admingroup" > $file ### Echo whole contents of file, add new line, add group. Print out everything to new file (not appending) -e allows for '\n'
+    - |
+      export IFS=","
+      export nl="\n"
+
+      export file=$CLUSTER_OC_NAME-uswin.data
+      for admingroup in $AD_DOMAIN_USWINx; do
+          if grep -Fxq "$admingroup" $file
+          then
+              echo "$admingroup already in $file, skipping"
+          else
+              echo "adding $admingroup"
+              if [ -z $(grep '[^[:space:]]' $file) ]; then
+                  echo "empty file, adding $admingroup"
+                  echo $admingroup > $file
+              else
+                  echo -e "$(cat $file)$nl$admingroup" > $file
+              fi
+          fi
+      done
+
+      export file=$CLUSTER_OC_NAME-emea.data
+      for admingroup in $AD_DOMAIN_EMEAx; do
+          if grep -Fxq "$admingroup" $file
+          then
+              echo "$admingroup already in $file, skipping"
+          else
+              echo "adding $admingroup"
+              if [ -z $(grep '[^[:space:]]' $file) ]; then
+                  echo "empty file, adding $admingroup"
+                  echo $admingroup > $file
+              else
+                  echo -e "$(cat $file)$nl$admingroup" > $file
+              fi
+          fi
+      done
+
+      export file=$CLUSTER_OC_NAME-adebp.data
+      for admingroup in $AD_DOMAIN_ADEBPx; do
+          if grep -Fxq "$admingroup" $file
+          then
+              echo "$admingroup already in $file, skipping"
+          else
+              echo "adding $admingroup"
+              if [ -z $(grep '[^[:space:]]' $file) ]; then
+                  echo "empty file, adding $admingroup"
+                  echo $admingroup > $file
+              else
+                  echo -e "$(cat $file)$nl$admingroup" > $file
+              fi
+          fi
+      done
+      
+      export file=$CLUSTER_OC_NAME-vdsi.data
+      for admingroup in $AD_DOMAIN_VDSIx; do
+          if grep -Fxq "$admingroup" $file
+          then
+              echo "$admingroup already in $file, skipping"
+          else
+              echo "adding $admingroup"
+              if [ -z $(grep '[^[:space:]]' $file) ]; then
+                  echo "empty file, adding $admingroup"
+                  echo $admingroup > $file
+              else
+                  echo -e "$(cat $file)$nl$admingroup" > $file
+              fi
+          fi
+      done
+    - cd ../../..
+    - cp -r $DATA_CENTER/$VSAD onboarding_gitops_manifests_nonprod/$DATA_CENTER/
+    - cp $VSAD-$APP-nonprod-$DATA_CENTER.yaml onboarding_gitops_manifests_nonprod/$DATA_CENTER/argoApps/
+    - cd onboarding_gitops_manifests_nonprod
+    - ls
+    - git add .
+    - git commit -m "push nonprod $VSAD/$APP/$ENV from pipeline"
+    - git push origin HEAD:main
+  artifacts:
+     paths:
+       - ./uuid.txt
+
+helm_dev:
+  stage: helm_dev
+  extends: .helm_template
+  only:
+    variables: 
+      - $DEV == "true"  
+  variables:
+    ENV: dev
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_qa:
+  stage: helm_qa
+  extends: .helm_template
+  only:
+    variables: 
+      - $QA == "true"  
+  variables:
+    ENV: qa
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_sit:
+  stage: helm_sit
+  extends: .helm_template
+  only:
+    variables: 
+      - $SIT == "true"
+  variables:
+    ENV: sit
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_stg:
+  stage: helm_stg
+  extends: .helm_template
+  only:
+    variables: 
+      - $STG == "true"  
+  variables:
+    ENV: stg
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_uat:
+  stage: helm_uat
+  extends: .helm_template
+  only:
+    variables: 
+      - $UAT == "true"  
+  variables:
+    ENV: uat
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_pre_prod:
+  stage: helm_pre_prod
+  extends: .helm_template
+  only:
+    variables: 
+      - $PREPROD == "true"  
+  variables:
+    ENV: preprod
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env      
