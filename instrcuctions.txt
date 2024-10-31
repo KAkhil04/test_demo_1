@@ -1,73 +1,286 @@
-Console log::
+stages:
+  - helm_dev
+  - helm_qa
+  - helm_sit
+  - helm_stg
+  - helm_uat
+  - helm_pre_prod
+  - helm_argo_app
+  - group_sync_and_git_push
 
+  
+variables:
+  TAMPA_NAME: "Tampa"
+  SAC_NAME: "Sacramento"
+  TWINSBURG_NAME: "Twinsburg"
+  MANIFEST_REPO: "gitlab.verizon.com/gts-openshift/onboarding_gitops_manifests_nonprod.git"
+  SPOKE_SECRET_NS: appdev-gitops
 
-Running with gitlab-runner 13.10.0~beta.65.g074336fb (074336fb)
-  on gitlab-runner-68669c77c7-m2px8 3Lg_m5yc
-Resolving secrets
-00:00
-Preparing the "kubernetes" executor
-00:00
-Using Kubernetes namespace: gitlab-system
-WARNING: Pulling GitLab Runner helper image from Docker Hub. Helper image is migrating to registry.gitlab.com, for more information see https://docs.gitlab.com/runner/configuration/advanced-configuration.html#migrating-helper-image-to-registrygitlabcom
-Using Kubernetes executor with image docker-remote.oneartifactoryci.verizon.com/alpine/git:latest ...
-Preparing environment
-00:04
-Waiting for pod gitlab-system/runner-3lgm5yc-project-227878-concurrent-085rwt to be running, status is Pending
-Running on runner-3lgm5yc-project-227878-concurrent-085rwt via gitlab-runner-68669c77c7-m2px8...
-Getting source from Git repository
-00:01
-Fetching changes with git depth set to 20...
-hint: Using 'master' as the name for the initial branch. This default branch name
-hint: is subject to change. To configure the initial branch name to use in all
-hint: of your new repositories, which will suppress this warning, call:
-hint: 
-hint: 	git config --global init.defaultBranch <name>
-hint: 
-hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
-hint: 'development'. The just-created branch can be renamed via this command:
-hint: 
-hint: 	git branch -m <name>
-Initialized empty Git repository in /tmp/gts-openshift/onboarding-pipline/.git/
-Created fresh repository.
-Checking out b3e53aa1 as OCP-3434...
-Skipping Git submodules setup
-Downloading artifacts
-00:04
-Downloading artifacts for helm_dev (35712165)...
-ERROR: Downloading artifacts from coordinator... error couldn't execute GET against https://gitlab.verizon.com/api/v4/jobs/35712165/artifacts?direct_download=true: Get "https://vz-app-gts-h32v-prod-gitlab-artifacts-west-s3bucket.s3.us-west-2.amazonaws.com/b0/ed/b0ed515aba748e236ffbfa581bedcfb53ea0d00fa16835dfa9210cd282cc1f03/%40final/a0/24/7484e3a25bc25a1e267916cc2a539effe8c4332fe9b8fe9c53ec794838b5?X-Amz-Expires=600&X-Amz-Date=20241031T152129Z&X-Amz-Security-Token=[FILTERED]&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=[FILTERED]&X-Amz-SignedHeaders=host&X-Amz-Signature=[FILTERED] read tcp 10.129.0.144:39022->52.92.191.98:443: read: connection reset by peer  id=35712165 token=64_GUTDs
-WARNING: Retrying...                                error=invalid argument
-Downloading artifacts from coordinator... ok        id=35712165 responseStatus=200 OK token=64_GUTDs
-Downloading artifacts for helm_argo_app (35712166)...
-ERROR: Downloading artifacts from coordinator... error couldn't execute GET against https://gitlab.verizon.com/api/v4/jobs/35712166/artifacts?direct_download=true: Get "https://vz-app-gts-h32v-prod-gitlab-artifacts-west-s3bucket.s3.us-west-2.amazonaws.com/b0/ed/b0ed515aba748e236ffbfa581bedcfb53ea0d00fa16835dfa9210cd282cc1f03/%40final/7f/2f/aa1853485cc6d1f11c846abd164a485cf4b3c23e342a4e16328f1e999774?X-Amz-Expires=600&X-Amz-Date=20241031T152131Z&X-Amz-Security-Token=[FILTERED]&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=[FILTERED]&X-Amz-SignedHeaders=host&X-Amz-Signature=[FILTERED] read tcp 10.129.0.144:39034->52.92.191.98:443: read: connection reset by peer  id=35712166 token=64_GUTDs
-WARNING: Retrying...                                error=invalid argument
-Downloading artifacts from coordinator... ok        id=35712166 responseStatus=200 OK token=64_GUTDs
-Executing "step_script" stage of the job script
-00:02
-$ echo $ENV
-dev
-$ cd nonprod/output/
-$ ls
-Dedicated
-ocp-test-nonprod-Dedicated.yaml
-$ git config --global user.email "Openshift.admins@verizon.com@verizon.com"
-Cloning into 'onboarding_gitops_manifests_nonprod'...
-$ git config --global user.name "onboardingpipeline-bot"
-$ git clone https://oauth2:$NONPROD_ACCESS_TOKEN@$MANIFEST_REPO
-$ ls
-Dedicated
-ocp-test-nonprod-Dedicated.yaml
-onboarding_gitops_manifests_nonprod
-$ cd onboarding_gitops_manifests_nonprod/groupsync/groups
-grep: sacpdocpspa02j14v-uswin.data: No such file or directory
-$ export IFS="," # collapsed multi-line command
-grep: sacpdocpspa02j14v-uswin.data: No such file or directory
-adding SDLC_KUBE_NONPROD_TEST_ADMIN
-cp: can't create 'onboarding_gitops_manifests_nonprod/Dedicated/sacpdocpspa02j14v/argoApps/': Is a directory
-empty file, adding SDLC_KUBE_NONPROD_TEST_ADMIN
-adding SDLC_KUBE_NONPROD_TEST_VIEW
-$ cd ../../..
-$ cp -r $DATA_CENTER/$CLUSTER_OC_NAME/$VSAD onboarding_gitops_manifests_nonprod/$DATA_CENTER/$CLUSTER_OC_NAME
-$ cp $VSAD-$APP-nonprod-$DATA_CENTER.yaml onboarding_gitops_manifests_nonprod/$DATA_CENTER/$CLUSTER_OC_NAME/argoApps/
-Cleaning up file based variables
-00:00
-ERROR: Job failed: command terminated with exit code 1
+.helm_template:
+  image: 
+    name: docker-remote.oneartifactoryci.verizon.com/alpine/helm:3.10.2
+    entrypoint: [""]
+  needs:
+    - pipeline: $ROOT_PIPELINE
+      job: getUUID
+  after_script:
+    - UUID=$(cat ./uuid.txt)
+    - echo $ENV # ENV holds dev, qa, sit, stg, uat
+    - echo $TSHIRT
+    - echo $VSAD
+    - echo $APP
+    - echo $SERVICEACCOUNT
+    - echo $DATA_CENTER
+    - echo $DATA_CENTER_URL
+    - echo $DEV_AD_GROUPSx
+    - echo $ADMIN_AD_GROUPSx
+    - cd nonprod 
+    - helm template $ENV-chart 
+     --dry-run -f $ENV-values.yaml 
+     --output-dir ./output/$DATA_CENTER/$VSAD/$APP/$ENV './' 
+     --set vsad=$VSAD
+     --set env=$ENV
+     --set appId=$APP 
+     --set serviceAccount.name=$SERVICEACCOUNT
+     --set tshirt=$TSHIRT
+     --set greenfield=$GREENFIELD
+     --set datacenter=$DATA_CENTER
+     --set datacenter_shortname=$DATA_CENTER_SHORT_NAME
+     --set datacenter_url=$DATA_CENTER_URL
+     --set "rolebindings.admin.subjects.name={$ADMIN_AD_GROUPSx}"
+     --set "rolebindings.dev.subjects.name={$DEV_AD_GROUPSx}"
+     --set uuid=$UUID
+     --set serviceAccountSecretNS=$SPOKE_SECRET_NS
+     --set "labels={$LABELSx}"
+     --set "annotations={$ANNOTATIONSx}"
+     #helm creates onboarding-pipeline folder, need to move newly created files out of that and into /vsad/app/env folder. then remove the onboarding-pipeline folder.
+    - mv ./output/$DATA_CENTER/$VSAD/$APP/$ENV/onboarding-pipeline/templates/* ./output/$DATA_CENTER/$VSAD/$APP/$ENV && rm -r ./output/$DATA_CENTER/$VSAD/$APP/$ENV/onboarding-pipeline/
+    - cd ./output/$DATA_CENTER/$VSAD/$APP/$ENV
+    - ls
+    - pwd
+    - echo "removing argoRootApp.yaml will be created later"
+    - rm argoRootApp.yaml
+    - echo "renaming argoEnvApp.yaml to $VSAD-$ENV-$APP.yaml"
+    - mv argoEnvApp.yaml $VSAD-$ENV-$APP.yaml
+    - cd ..
+    - ls -ltra
+    - mv $ENV/$VSAD-$ENV-$APP.yaml . #for some reason, mving with pathing doesn't work here.
+  artifacts:
+    name: "output"
+    untracked: true
+    paths:
+      - output
+      - ./uuid.txt 
+
+helm_argo_app:
+  stage: helm_argo_app
+  image: 
+    name: docker-remote.oneartifactoryci.verizon.com/alpine/helm:3.10.2
+    entrypoint: [""]
+  script:
+    - cd nonprod ##
+    - helm template argoapp-chart 
+     --dry-run -f $ENV-values.yaml './' 
+     --show-only templates/argoRootApp.yaml
+     --set vsad=$VSAD
+     --set env=$ENV
+     --set appId=$APP 
+     --set serviceAccount.name=$SERVICEACCOUNT 
+     --set tshirt=$TSHIRT 
+     --set serviceAccountSecretNS=$SPOKE_SECRET_NS
+     --set datacenter_url=$DATA_CENTER_URL
+     --set greenfield=$GREENFIELD --set datacenter=$DATA_CENTER --set datacenter_shortname=$DATA_CENTER_SHORT_NAME --set uuid=$UUID > ./output/$VSAD-$APP-nonprod-$DATA_CENTER.yaml
+     #helm creates onboarding-pipeline folder, need to move newly created files out of that and into /vsad/app/env folder. then remove the onboarding-pipeline folder.
+  artifacts:
+    name: "output"
+    untracked: true
+    paths:
+      - output
+      - ./uuid.txt 
+
+group_sync_and_git_push:
+  stage: group_sync_and_git_push
+  image: 
+    name: docker-remote.oneartifactoryci.verizon.com/alpine/git:latest
+    entrypoint: [""]
+  script:
+    - echo $ENV
+    - cd nonprod/output/ #$DATA_CENTER
+    - ls
+    - git config --global user.email "Openshift.admins@verizon.com@verizon.com"
+    - git config --global user.name "onboardingpipeline-bot"
+    - git clone https://oauth2:$NONPROD_ACCESS_TOKEN@$MANIFEST_REPO
+    - ls
+    - cd onboarding_gitops_manifests_nonprod/groupsync/groups
+    # For each AD group, check file if exists. if it does not exist, add the group to the file
+    # helm treats whitespaces as a group, so need to be aware of that.
+    # if [ -z $(grep '[^[:space:]]' $file) ]; then ### check for empty or only has whitespaces in file
+    # echo -e "$(cat $file)$nl$admingroup" > $file ### Echo whole contents of file, add new line, add group. Print out everything to new file (not appending) -e allows for '\n'
+    - |
+      export IFS=","
+      export nl="\n"
+
+      export file=$CLUSTER_OC_NAME-uswin.data
+      for admingroup in $AD_DOMAIN_USWINx; do
+          if grep -Fxq "$admingroup" $file
+          then
+              echo "$admingroup already in $file, skipping"
+          else
+              echo "adding $admingroup"
+              if [ -z $(grep '[^[:space:]]' $file) ]; then
+                  echo "empty file, adding $admingroup"
+                  echo $admingroup > $file
+              else
+                  echo -e "$(cat $file)$nl$admingroup" > $file
+              fi
+          fi
+      done
+
+      export file=$CLUSTER_OC_NAME-emea.data
+      for admingroup in $AD_DOMAIN_EMEAx; do
+          if grep -Fxq "$admingroup" $file
+          then
+              echo "$admingroup already in $file, skipping"
+          else
+              echo "adding $admingroup"
+              if [ -z $(grep '[^[:space:]]' $file) ]; then
+                  echo "empty file, adding $admingroup"
+                  echo $admingroup > $file
+              else
+                  echo -e "$(cat $file)$nl$admingroup" > $file
+              fi
+          fi
+      done
+
+      export file=$CLUSTER_OC_NAME-adebp.data
+      for admingroup in $AD_DOMAIN_ADEBPx; do
+          if grep -Fxq "$admingroup" $file
+          then
+              echo "$admingroup already in $file, skipping"
+          else
+              echo "adding $admingroup"
+              if [ -z $(grep '[^[:space:]]' $file) ]; then
+                  echo "empty file, adding $admingroup"
+                  echo $admingroup > $file
+              else
+                  echo -e "$(cat $file)$nl$admingroup" > $file
+              fi
+          fi
+      done
+      
+      export file=$CLUSTER_OC_NAME-vdsi.data
+      for admingroup in $AD_DOMAIN_VDSIx; do
+          if grep -Fxq "$admingroup" $file
+          then
+              echo "$admingroup already in $file, skipping"
+          else
+              echo "adding $admingroup"
+              if [ -z $(grep '[^[:space:]]' $file) ]; then
+                  echo "empty file, adding $admingroup"
+                  echo $admingroup > $file
+              else
+                  echo -e "$(cat $file)$nl$admingroup" > $file
+              fi
+          fi
+      done
+    - cd ../../..
+    - cp -r $DATA_CENTER/$VSAD onboarding_gitops_manifests_nonprod/$DATA_CENTER/
+    - cp $VSAD-$APP-nonprod-$DATA_CENTER.yaml onboarding_gitops_manifests_nonprod/$DATA_CENTER/argoApps/
+    - cd onboarding_gitops_manifests_nonprod
+    - ls
+    - git add .
+    - git commit -m "push nonprod $VSAD/$APP/$ENV from pipeline"
+    - git push origin HEAD:main
+  artifacts:
+     paths:
+       - ./uuid.txt
+
+helm_dev:
+  stage: helm_dev
+  extends: .helm_template
+  only:
+    variables: 
+      - $DEV == "true"  
+  variables:
+    ENV: dev
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_qa:
+  stage: helm_qa
+  extends: .helm_template
+  only:
+    variables: 
+      - $QA == "true"  
+  variables:
+    ENV: qa
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_sit:
+  stage: helm_sit
+  extends: .helm_template
+  only:
+    variables: 
+      - $SIT == "true"
+  variables:
+    ENV: sit
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_stg:
+  stage: helm_stg
+  extends: .helm_template
+  only:
+    variables: 
+      - $STG == "true"  
+  variables:
+    ENV: stg
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_uat:
+  stage: helm_uat
+  extends: .helm_template
+  only:
+    variables: 
+      - $UAT == "true"  
+  variables:
+    ENV: uat
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env
+
+helm_pre_prod:
+  stage: helm_pre_prod
+  extends: .helm_template
+  only:
+    variables: 
+      - $PREPROD == "true"  
+  variables:
+    ENV: preprod
+  script:
+    - echo $ENV
+    - echo "ENV=$ENV" >> myVars.env
+  artifacts:
+    reports:
+      dotenv: myVars.env      
