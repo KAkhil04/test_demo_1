@@ -17,22 +17,21 @@ Get-ChildItem -Path $BASE_DIR -Recurse -Filter *.yaml | ForEach-Object {
 
     # If cluster name is found
     if ($cluster_name) {
-        # Determine the current vsad and app directories
+        # Determine the current vsad directory
         $vsad_dir = Split-Path -Path (Split-Path -Path (Split-Path -Path $file -Parent) -Parent) -Parent
-        $app_dir = Split-Path -Path (Split-Path -Path $file -Parent) -Parent
 
         # Create the new directory structure
-        $new_dir = Join-Path -Path $BASE_DIR -ChildPath "$cluster_name\$(Split-Path -Leaf $vsad_dir)\$(Split-Path -Leaf $app_dir)"
+        $new_dir = Join-Path -Path $BASE_DIR -ChildPath "$cluster_name\$(Split-Path -Leaf $vsad_dir)"
         New-Item -ItemType Directory -Path $new_dir -Force | Out-Null
 
         # Copy the entire vsad directory to the new location
-        Copy-Item -Path $vsad_dir -Destination (Join-Path -Path $BASE_DIR -ChildPath $cluster_name) -Recurse -Force
+        Copy-Item -Path $vsad_dir -Destination $new_dir -Recurse -Force
 
         # Update line 18 in the copied YAML file
-        $new_file = Join-Path -Path $new_dir -ChildPath (Split-Path -Leaf $file)
+        $new_file = Join-Path -Path $new_dir -ChildPath "$(Split-Path -Leaf $vsad_dir)\app\$(Split-Path -Leaf $file)"
         (Get-Content -Path $new_file) | ForEach-Object {
             if ($_ -match 'path: Dedicated/.*') {
-                $_ -replace 'path: Dedicated/.*', "path: Dedicated/$cluster_name/$(Split-Path -Leaf $vsad_dir)/$(Split-Path -Leaf $app_dir)/env"
+                $_ -replace 'path: Dedicated/.*', "path: Dedicated/$cluster_name/$(Split-Path -Leaf $vsad_dir)/env"
             } else {
                 $_
             }
