@@ -1,43 +1,64 @@
-# Base directory
-$BASE_DIR = "dedicated"
+# Define the source and destination base directories
+$sourceBaseDir = "dedicated"
+$destBaseDir = "dedicated"
 
-# Find all YAML files in the specified directory
-Get-ChildItem -Path $BASE_DIR -Recurse -Filter *.yaml | ForEach-Object {
-    $file = $_.FullName
+# Function to read the cluster name from the YAML file
+function Get-ClusterNameFromYaml {
+    param (
+        [string]$filePath
+    )
+    $line = Get-Content -Path $filePath | Select-Object -Index 19
+    if ($line -match "https://api\.([^.]+)\.") {
+        return $matches[1]
+    }
+    return $null
+}
 
-    # Extract the cluster name from line 20
-    $line20 = Get-Content -Path $file | Select-Object -Index 19
-    if ($line20 -match 'https:\/\/api\.(.*?)\.ebiz\.verizon\.com') {
-        $cluster_name = $matches[1]
-    } elseif ($line20 -match 'https:\/\/api\.(.*?)\.verizon\.com') {
-        $cluster_name = $matches[1]
-    } else {
-        $cluster_name = $null
+# Function to move and update the YAML file
+function MoveAndModifyYamlFile {
+    param (
+        [string]$sourceFilePath,
+        [string]$destFilePath,
+        [string]$clusterName
+    )
+    # Create the destination directory if it doesn't exist
+    $destDir = Split-Path -Path $destFilePath -Parent
+    if (-not (Test-Path -Path $destDir)) {
+        New-Item -ItemType Directory -Path $destDir -Force
     }
 
-    # If cluster name is found
-    if ($cluster_name) {
-        # Determine the current vsad directory
-        $vsad_dir = Split-Path -Path (Split-Path -Path (Split-Path -Path $file -Parent) -Parent) -Parent
+    # Read the content of the YAML file
+    $content = Get-Content -Path $sourceFilePath
 
-        # Create the new directory structure
-        $new_dir = Join-Path -Path $BASE_DIR -ChildPath "$cluster_name"
-        New-Item -ItemType Directory -Path $new_dir -Force | Out-Null
+    # Update the cluster name in line 20
+    $content[19] = $content[19] -replace "https://api\.[^.]+\.", "https://api.$clusterName."
 
-        # Copy the entire vsad directory to the new location
-        $vsad_name = Split-Path -Leaf $vsad_dir
-        Copy-Item -Path $vsad_dir -Destination $new_dir -Recurse -Force
+    # Write the updated content to the new file
+    $content | Set-Content -Path $destFilePath
 
-        # Update line 18 in the copied YAML file
-        $new_file = Join-Path -Path $new_dir -ChildPath "$vsad_name\app\$(Split-Path -Leaf $file)"
-        (Get-Content -Path $new_file) | ForEach-Object {
-            if ($_ -match 'path: Dedicated/.*') {
-                $_ -replace 'path: Dedicated/.*', "path: Dedicated/$cluster_name/$vsad_name/env"
-            } else {
-                $_
-            }
-        } | Set-Content -Path $new_file
-    } else {
-        Write-Host "Cluster name not found in $file"
+    # Remove the original file
+    Remove-Item -Path $sourceFilePath
+}
+
+# Process each YAML file in the source directory
+Get-ChildItem -Path $sourceBaseDir -Recurse -Filter *.yaml | ForEach-Object {
+    $sourceFilePath = $_.FullName
+    $clusterName = Get-ClusterNameFromYaml -filePath $sourceFilePath
+
+    if ($clusterName) {
+        # Construct the destination file path
+        $relativePath = $sourceFilePath.Substring((Get-Location).Path.Length + 1)
+        $destFilePath = Join-Path -Path $destBaseDir -ChildPath $relativePath
+        $destFilePath = $destFilePath -replace "^[^\\]+", $clusterName
+
+        # Move and modify the YAML file
+        MoveAndModifyYamlFile -sourceFilePath $sourceFilePath -destFilePath $destFilePath -clusterName $clusterName
+
+        # Move the entire vsad directory to the new cluster directory
+        $vsadDir = Split-Path -Path $sourceFilePath -Parent -Parent
+        $newVsadDir = Join-Path -Path $destBaseDir -ChildPath "$clusterName\$($vsadDir.Substring($sourceBaseDir.Length + 1))"
+        if (-not (Test-Path -Path $newVsadDir)) {
+            Move-Item -Path $vsadDir -Destination $newVsadDir
+        }
     }
 }
