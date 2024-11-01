@@ -1,0 +1,21 @@
+---
+# Source: onboarding-pipeline/templates/argoEnvApp.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vbg-b6vv-dev-cxpdomainvbg
+  namespace: appdev-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: '1'
+spec:
+  project: appdev
+  syncPolicy:
+    automated:
+      prune: true
+  source:
+    repoURL: https://gitlab.verizon.com/gts-openshift/onboarding_gitops_manifests_nonprod.git
+    targetRevision: HEAD
+    path: Dedicated/b6vv/cxpdomainvbg/dev
+  destination:
+    server: https://api.tpanpocpcp4j14v.ebiz.verizon.com:6443
+    namespace: appdev-gitops
