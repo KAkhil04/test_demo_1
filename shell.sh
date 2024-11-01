@@ -7,9 +7,9 @@ Get-ChildItem -Path $BASE_DIR -Recurse -Filter *.yaml | ForEach-Object {
 
     # Extract the cluster name from line 20
     $line20 = Get-Content -Path $file | Select-Object -Index 19
-    if ($line20 -match 'https:\/\/api\.(.*)\.ebiz\.verizon\.com') {
+    if ($line20 -match 'https:\/\/api\.(.*?)\.ebiz\.verizon\.com') {
         $cluster_name = $matches[1]
-    } elseif ($line20 -match 'https:\/\/api\.(.*)\.verizon\.com') {
+    } elseif ($line20 -match 'https:\/\/api\.(.*?)\.verizon\.com') {
         $cluster_name = $matches[1]
     } else {
         $cluster_name = $null
@@ -30,7 +30,13 @@ Get-ChildItem -Path $BASE_DIR -Recurse -Filter *.yaml | ForEach-Object {
 
         # Update line 18 in the copied YAML file
         $new_file = Join-Path -Path $new_dir -ChildPath (Split-Path -Leaf $file)
-        (Get-Content -Path $new_file) | ForEach-Object {$_ -replace 'path: Dedicated/.*', "path: Dedicated/$cluster_name/$(Split-Path -Leaf $vsad_dir)/$(Split-Path -Leaf $app_dir)/env"} | Set-Content -Path $new_file
+        (Get-Content -Path $new_file) | ForEach-Object {
+            if ($_ -match 'path: Dedicated/.*') {
+                $_ -replace 'path: Dedicated/.*', "path: Dedicated/$cluster_name/$(Split-Path -Leaf $vsad_dir)/$(Split-Path -Leaf $app_dir)/env"
+            } else {
+                $_
+            }
+        } | Set-Content -Path $new_file
     } else {
         Write-Host "Cluster name not found in $file"
     }
