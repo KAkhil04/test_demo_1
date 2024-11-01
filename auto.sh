@@ -41,6 +41,15 @@ moveAndModifyYamlFile() {
     rm "$sourceFilePath"
 }
 
+# Function to copy folders under vsad directories
+copyVsadFolders() {
+    local sourceVsadDir="$1"
+    local destVsadDir="$2"
+
+    # Copy all folders and files from source vsad directory to destination vsad directory
+    cp -r "$sourceVsadDir"/* "$destVsadDir"
+}
+
 # Process each YAML file in the source directory
 find "$sourceBaseDir" -type f -name "*.yaml" | while read -r sourceFilePath; do
     clusterName=$(getClusterNameFromYaml "$sourceFilePath")
@@ -60,8 +69,12 @@ find "$sourceBaseDir" -type f -name "*.yaml" | while read -r sourceFilePath; do
         newVsadDir="$destBaseDir/$clusterName/${vsadDir#$sourceBaseDir/}"
         if [[ ! -d $newVsadDir ]]; then
             echo "Moving directory: $vsadDir to $newVsadDir"
-            mv "$vsadDir" "$newVsadDir"
+            mkdir -p "$(dirname "$newVsadDir")"
+            mv "$vsadDir" "$(dirname "$newVsadDir")"
         fi
+
+        # Copy folders under vsad directories
+        copyVsadFolders "$vsadDir" "$newVsadDir"
     else
         echo "Cluster name not found in file: $sourceFilePath"
     fi
