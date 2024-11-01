@@ -1,5 +1,5 @@
 # Base directory
-$BASE_DIR = "onboarding_gitops_manifests_nonprod/dedicated"
+$BASE_DIR = "dedicated"
 
 # Find all YAML files in the specified directory
 Get-ChildItem -Path $BASE_DIR -Recurse -Filter *.yaml | ForEach-Object {
@@ -21,17 +21,18 @@ Get-ChildItem -Path $BASE_DIR -Recurse -Filter *.yaml | ForEach-Object {
         $vsad_dir = Split-Path -Path (Split-Path -Path (Split-Path -Path $file -Parent) -Parent) -Parent
 
         # Create the new directory structure
-        $new_dir = Join-Path -Path $BASE_DIR -ChildPath "$cluster_name\$(Split-Path -Leaf $vsad_dir)"
+        $new_dir = Join-Path -Path $BASE_DIR -ChildPath "$cluster_name"
         New-Item -ItemType Directory -Path $new_dir -Force | Out-Null
 
         # Copy the entire vsad directory to the new location
-        Copy-Item -Path $vsad_dir -Destination $new_dir -Recurse -Force
+        $vsad_name = Split-Path -Leaf $vsad_dir
+        Copy-Item -Path $vsad_dir -Destination (Join-Path -Path $new_dir -ChildPath $vsad_name) -Recurse -Force
 
         # Update line 18 in the copied YAML file
-        $new_file = Join-Path -Path $new_dir -ChildPath "$(Split-Path -Leaf $vsad_dir)\app\$(Split-Path -Leaf $file)"
+        $new_file = Join-Path -Path (Join-Path -Path $new_dir -ChildPath $vsad_name) -ChildPath "app\$(Split-Path -Leaf $file)"
         (Get-Content -Path $new_file) | ForEach-Object {
             if ($_ -match 'path: Dedicated/.*') {
-                $_ -replace 'path: Dedicated/.*', "path: Dedicated/$cluster_name/$(Split-Path -Leaf $vsad_dir)/env"
+                $_ -replace 'path: Dedicated/.*', "path: Dedicated/$cluster_name/$vsad_name/env"
             } else {
                 $_
             }
