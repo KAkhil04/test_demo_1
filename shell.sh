@@ -26,10 +26,10 @@ Get-ChildItem -Path $BASE_DIR -Recurse -Filter *.yaml | ForEach-Object {
 
         # Copy the entire vsad directory to the new location
         $vsad_name = Split-Path -Leaf $vsad_dir
-        Copy-Item -Path $vsad_dir -Destination (Join-Path -Path $new_dir -ChildPath $vsad_name) -Recurse -Force
+        Copy-Item -Path $vsad_dir -Destination $new_dir -Recurse -Force
 
         # Update line 18 in the copied YAML file
-        $new_file = Join-Path -Path (Join-Path -Path $new_dir -ChildPath $vsad_name) -ChildPath "app\$(Split-Path -Leaf $file)"
+        $new_file = Join-Path -Path $new_dir -ChildPath "$vsad_name\app\$(Split-Path -Leaf $file)"
         (Get-Content -Path $new_file) | ForEach-Object {
             if ($_ -match 'path: Dedicated/.*') {
                 $_ -replace 'path: Dedicated/.*', "path: Dedicated/$cluster_name/$vsad_name/env"
