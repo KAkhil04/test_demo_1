@@ -1,0 +1,3 @@
+Found cluster name: tdcnpocpntsj14v in file: dedicated/c2av/bgw/c2av-dev-bgw.yaml
+Creating argoApps directory: dedicated/tdcnpocpntsj14v/argoApps
+Source YAML file Dedicated/argoApps/dedicated-c2av-nonprod-Dedicated.yaml not found
