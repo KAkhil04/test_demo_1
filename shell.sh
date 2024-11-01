@@ -21,7 +21,7 @@ Get-ChildItem -Path $BASE_DIR -Recurse -Filter *.yaml | ForEach-Object {
         $vsad_dir = Split-Path -Path (Split-Path -Path (Split-Path -Path $file -Parent) -Parent) -Parent
 
         # Create the new directory structure
-        $new_dir = Join-Path -Path $BASE_DIR -ChildPath "$cluster_name"
+        $new_dir = Join-Path -Path $BASE_DIR -ChildPath "$cluster_name\$(Split-Path -Leaf $vsad_dir)"
         New-Item -ItemType Directory -Path $new_dir -Force | Out-Null
 
         # Copy the entire vsad directory to the new location
