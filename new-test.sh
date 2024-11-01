@@ -103,8 +103,8 @@ find "$sourceBaseDir" -type f -name "*.yaml" | while read -r sourceFilePath; do
         fi
 
         # Extract vsad and app from the directory structure
-        vsad=$(basename "$(dirname "$vsadDir")")
-        app=$(basename "$vsadDir")
+        vsad=$(basename "$(dirname "$(dirname "$sourceFilePath")")")
+        app=$(basename "$(dirname "$sourceFilePath")")
 
         # Copy the appropriate YAML file to the argoApps folder
         copyArgoAppsYaml "$vsad" "$app" "$clusterName" "$argoAppsDir"
