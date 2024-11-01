@@ -58,7 +58,7 @@ Get-ChildItem -Path $sourceBaseDir -Recurse -Filter *.yaml | ForEach-Object {
         $vsadDir = Split-Path -Path $sourceFilePath -Parent -Parent
         $newVsadDir = Join-Path -Path $destBaseDir -ChildPath "$clusterName\$($vsadDir.Substring($sourceBaseDir.Length + 1))"
         if (-not (Test-Path -Path $newVsadDir)) {
-            Move-Item -Path $vsadDir -Destination $newVsadDir
+            Move-Item -Path $vsadDir -Destination $newVsadDir -Force
         }
     }
 }
