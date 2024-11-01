@@ -46,8 +46,10 @@ Get-ChildItem -Path $sourceBaseDir -Recurse -Filter *.yaml | ForEach-Object {
     $clusterName = Get-ClusterNameFromYaml -filePath $sourceFilePath
 
     if ($clusterName) {
+        Write-Output "Found cluster name: $clusterName in file: $sourceFilePath"
+
         # Construct the destination file path
-        $relativePath = $sourceFilePath.Substring((Get-Location).Path.Length + 1)
+        $relativePath = $sourceFilePath.Substring($sourceBaseDir.Length + 1)
         $destFilePath = Join-Path -Path $destBaseDir -ChildPath $relativePath
         $destFilePath = $destFilePath -replace "^[^\\]+", $clusterName
 
@@ -61,5 +63,7 @@ Get-ChildItem -Path $sourceBaseDir -Recurse -Filter *.yaml | ForEach-Object {
             Write-Output "Moving directory: $vsadDir to $newVsadDir"
             Move-Item -Path $vsadDir -Destination $newVsadDir -Recurse -Force
         }
+    } else {
+        Write-Output "Cluster name not found in file: $sourceFilePath"
     }
 }
