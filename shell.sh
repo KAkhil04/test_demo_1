@@ -1,69 +1,69 @@
+#!/bin/bash
+
 # Define the source and destination base directories
-$sourceBaseDir = "dedicated"
-$destBaseDir = "dedicated"
+sourceBaseDir="dedicated"
+destBaseDir="dedicated"
 
 # Function to read the cluster name from the YAML file
-function Get-ClusterNameFromYaml {
-    param (
-        [string]$filePath
-    )
-    $line = Get-Content -Path $filePath | Select-Object -Index 19
-    if ($line -match "https://api\.([^.]+)\.") {
-        return $matches[1]
-    }
-    return $null
+getClusterNameFromYaml() {
+    local filePath="$1"
+    local line=$(sed -n '20p' "$filePath")
+    if [[ $line =~ https://api\.([^.]+)\. ]]; then
+        echo "${BASH_REMATCH[1]}"
+    else
+        echo ""
+    fi
 }
 
 # Function to move and update the YAML file
-function MoveAndModifyYamlFile {
-    param (
-        [string]$sourceFilePath,
-        [string]$destFilePath,
-        [string]$clusterName
-    )
+moveAndModifyYamlFile() {
+    local sourceFilePath="$1"
+    local destFilePath="$2"
+    local clusterName="$3"
+
     # Create the destination directory if it doesn't exist
-    $destDir = Split-Path -Path $destFilePath -Parent
-    if (-not (Test-Path -Path $destDir)) {
-        New-Item -ItemType Directory -Path $destDir -Force
-    }
+    local destDir
+    destDir=$(dirname "$destFilePath")
+    mkdir -p "$destDir"
 
     # Read the content of the YAML file
-    $content = Get-Content -Path $sourceFilePath
+    local content
+    content=$(<"$sourceFilePath")
 
     # Update the cluster name in line 20
-    $content[19] = $content[19] -replace "https://api\.[^.]+\.", "https://api.$clusterName."
+    local updatedContent
+    updatedContent=$(echo "$content" | sed "20s|https://api\.[^.]\+\.|https://api.$clusterName.|")
 
     # Write the updated content to the new file
-    $content | Set-Content -Path $destFilePath
+    echo "$updatedContent" > "$destFilePath"
 
     # Remove the original file
-    Remove-Item -Path $sourceFilePath
+    rm "$sourceFilePath"
 }
 
 # Process each YAML file in the source directory
-Get-ChildItem -Path $sourceBaseDir -Recurse -Filter *.yaml | ForEach-Object {
-    $sourceFilePath = $_.FullName
-    $clusterName = Get-ClusterNameFromYaml -filePath $sourceFilePath
+find "$sourceBaseDir" -type f -name "*.yaml" | while read -r sourceFilePath; do
+    clusterName=$(getClusterNameFromYaml "$sourceFilePath")
 
-    if ($clusterName) {
-        Write-Output "Found cluster name: $clusterName in file: $sourceFilePath"
+    if [[ -n $clusterName ]]; then
+        echo "Found cluster name: $clusterName in file: $sourceFilePath"
 
         # Construct the destination file path
-        $relativePath = $sourceFilePath.Substring($sourceBaseDir.Length + 1)
-        $destFilePath = Join-Path -Path $destBaseDir -ChildPath $relativePath
-        $destFilePath = $destFilePath -replace "^[^\\]+", $clusterName
+        relativePath="${sourceFilePath#$sourceBaseDir/}"
+        destFilePath="$destBaseDir/$clusterName/$relativePath"
 
         # Move and modify the YAML file
-        MoveAndModifyYamlFile -sourceFilePath $sourceFilePath -destFilePath $destFilePath -clusterName $clusterName
+        moveAndModifyYamlFile "$sourceFilePath" "$destFilePath" "$clusterName"
 
         # Move the entire vsad directory to the new cluster directory
-        $vsadDir = Split-Path -Path $sourceFilePath -Parent -Parent
-        $newVsadDir = Join-Path -Path $destBaseDir -ChildPath "$clusterName\$($vsadDir.Substring($sourceBaseDir.Length + 1))"
-        if (-not (Test-Path -Path $newVsadDir)) {
-            Write-Output "Moving directory: $vsadDir to $newVsadDir"
-            Move-Item -Path $vsadDir -Destination $newVsadDir -Recurse -Force
-        }
-    } else {
-        Write-Output "Cluster name not found in file: $sourceFilePath"
-    }
-}
+        vsadDir=$(dirname "$(dirname "$sourceFilePath")")
+        newVsadDir="$destBaseDir/$clusterName/${vsadDir#$sourceBaseDir/}"
+        if [[ ! -d $newVsadDir ]]; then
+            echo "Moving directory: $vsadDir to $newVsadDir"
+            mkdir -p "$(dirname "$newVsadDir")"
+            mv "$vsadDir" "$(dirname "$newVsadDir")"
+        fi
+    else
+        echo "Cluster name not found in file: $sourceFilePath"
+    fi
+done
