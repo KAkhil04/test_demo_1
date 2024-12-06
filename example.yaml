@@ -13,9 +13,9 @@ spec:
     automated:
       prune: true
   source:
-    repoURL: https://gitlab.verizon.com/gts-openshift/onboarding_gitops_manifests_nonprod.git
+    repoURL: https://gitlab.com/gts-openshift/onboarding_gitops_manifests_nonprod.git
     targetRevision: HEAD
     path: Dedicated/b6vv/cxpdomainvbg/dev
   destination:
-    server: https://api.tpanpocpcp4j14v.ebiz.verizon.com:6443
+    server: https://api.tpanpocp.ebiz.verizon.com:6443
     namespace: appdev-gitops
