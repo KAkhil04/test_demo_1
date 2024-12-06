@@ -13,12 +13,12 @@ variables:
   TAMPA_NAME: "Tampa"
   SAC_NAME: "Sacramento"
   TWINSBURG_NAME: "Twinsburg"
-  MANIFEST_REPO: "gitlab.verizon.com/gts-openshift/onboarding_gitops_manifests_nonprod.git"
+  MANIFEST_REPO: "gitlab.com/gts-openshift/onboarding_gitops_manifests_nonprod.git"
   SPOKE_SECRET_NS: appdev-gitops
 
 .helm_template:
   image: 
-    name: docker-remote.oneartifactoryci.verizon.com/alpine/helm:3.10.2
+    name: docker-remote.com/alpine/helm:3.10.2
     entrypoint: [""]
   needs:
     - pipeline: $ROOT_PIPELINE
@@ -75,7 +75,7 @@ variables:
 helm_argo_app:
   stage: helm_argo_app
   image: 
-    name: docker-remote.oneartifactoryci.verizon.com/alpine/helm:3.10.2
+    name: docker-remote.com/alpine/helm:3.10.2
     entrypoint: [""]
   script:
     - cd nonprod ##
@@ -101,13 +101,13 @@ helm_argo_app:
 group_sync_and_git_push:
   stage: group_sync_and_git_push
   image: 
-    name: docker-remote.oneartifactoryci.verizon.com/alpine/git:latest
+    name: docker-remote.com/alpine/git:latest
     entrypoint: [""]
   script:
     - echo $ENV
     - cd nonprod/output/ #$DATA_CENTER
     - ls
-    - git config --global user.email "Openshift.admins@verizon.com@verizon.com"
+    - git config --global user.email 
     - git config --global user.name "onboardingpipeline-bot"
     - git clone https://oauth2:$NONPROD_ACCESS_TOKEN@$MANIFEST_REPO
     - ls
