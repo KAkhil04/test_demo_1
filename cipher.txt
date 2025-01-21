@@ -1,0 +1,4 @@
+can you see what's involved with tweaking the cipher suite to remove these two ciphers?
+DHE-RSA-AES128-GCM-SHA256
+DHE-RSA-AES256-GCM-SHA38
+they do appear to be weak. everything else is ok.
