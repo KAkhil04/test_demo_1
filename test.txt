@@ -1,3 +1,14 @@
-[kurelak@tdcldj14va001 ~]$ oc cp costmanagement-metrics-operator-67bc99c8-tzm2g:/tmp/costmanagement-metrics-operator-reports/data /vzwhome/kurelak/reports
-time="2025-01-21T17:53:09Z" level=error msg="exec failed: unable to start container process: exec: \"tar\": executable file not found in $PATH"
-command terminated with exit code 255
+#!/bin/bash
+
+POD_NAME="costmanagement-metrics-operator-67bc99c8-tzm2g"
+REMOTE_DIR="/tmp/costmanagement-metrics-operator-reports/data"
+LOCAL_DIR="/vzwhome/kurelak/reports"
+
+# List CSV files in the pod directory
+FILES=$(oc exec $POD_NAME -- ls $REMOTE_DIR/*.csv)
+
+# Copy each file individually
+for FILE in $FILES; do
+  FILENAME=$(basename $FILE)
+  oc cp $POD_NAME:$FILE $LOCAL_DIR/$FILENAME
+done
