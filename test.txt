@@ -1,0 +1,3 @@
+[kurelak@tdcldj14va001 ~]$ oc cp costmanagement-metrics-operator-67bc99c8-tzm2g:/tmp/costmanagement-metrics-operator-reports/data /vzwhome/kurelak/reports
+time="2025-01-21T17:53:09Z" level=error msg="exec failed: unable to start container process: exec: \"tar\": executable file not found in $PATH"
+command terminated with exit code 255
