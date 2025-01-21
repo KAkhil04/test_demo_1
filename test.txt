@@ -4,11 +4,22 @@ POD_NAME="costmanagement-metrics-operator-67bc99c8-tzm2g"
 REMOTE_DIR="/tmp/costmanagement-metrics-operator-reports/data"
 LOCAL_DIR="/vzwhome/kurelak/reports"
 
+# Create local directory if it doesn't exist
+mkdir -p $LOCAL_DIR
+
 # List CSV files in the pod directory
 FILES=$(oc exec $POD_NAME -- ls $REMOTE_DIR/*.csv)
 
 # Copy each file individually
 for FILE in $FILES; do
   FILENAME=$(basename $FILE)
-  oc cp $POD_NAME:$FILE $LOCAL_DIR/$FILENAME
+  
+  # Encode the file content to base64
+  oc exec $POD_NAME -- base64 $FILE > $LOCAL_DIR/$FILENAME.base64
+  
+  # Decode the base64 content back to CSV
+  base64 -d $LOCAL_DIR/$FILENAME.base64 > $LOCAL_DIR/$FILENAME
+  
+  # Remove the base64 encoded file
+  rm $LOCAL_DIR/$FILENAME.base64
 done
