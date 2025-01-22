@@ -1,3 +1,17 @@
-C:\Users\kurelak\reports>scp kurelak@tdcldj14va001.ebiz.verizon.com:/vzwhome/kurelak/reports/cm-openshift-namespace-usage-202501.tar.gz C:\Users\kurelak\reports
-Corrupted MAC on input.
-ssh_dispatch_run_fatal: Connection to 10.97.198.146 port 22: message authentication code incorrect
+that's the limits/requests, not actual.
+look at the bottom of the screen. the hard limit is 60G. they're using less than half that. they need to reduce their limits.
+i don't think there's a shortage of resources. there's a mismanagement of their requests and limits. i'm willing to bet that they have plenty of memory to run things, their deployments just aren't set correctly
+this is their ACTUAL memory usage for 2 weeks (i only grabbed the first week). they are only using 35G max but the limits are almost 60.
+that's why i'm saying the manifests should be adjusted. they have memory available to use.
+most of their pods don't need 5gb to run
+this is how they're configured today.
+NAME                     CPU LIMIT   MEM LIMIT   CPU REQUEST   MEM REQUEST
+liveperson-b2b-deploy    3           5Gi         1             1Gi
+liveperson-b360-deploy   3           5Gi         1             1Gi
+liveperson-deploy        3           5Gi         1             1Gi
+liveperson-vbg-deploy    3           5Gi         1             1Gi
+metrics-deploy           3           4Gi         1             1Gi
+py-metrics-deploy        3           5Gi         1             1Gi
+vecdialogflow-deploy     3           5Gi         1             1Gi
+liveperson-deploy is eating 10GB based on the replicas but only using 5GB total.
+we need to get these teams more in alignment with actual usage.
