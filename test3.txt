@@ -1,17 +1,19 @@
-that's the limits/requests, not actual.
-look at the bottom of the screen. the hard limit is 60G. they're using less than half that. they need to reduce their limits.
-i don't think there's a shortage of resources. there's a mismanagement of their requests and limits. i'm willing to bet that they have plenty of memory to run things, their deployments just aren't set correctly
-this is their ACTUAL memory usage for 2 weeks (i only grabbed the first week). they are only using 35G max but the limits are almost 60.
-that's why i'm saying the manifests should be adjusted. they have memory available to use.
-most of their pods don't need 5gb to run
-this is how they're configured today.
-NAME                     CPU LIMIT   MEM LIMIT   CPU REQUEST   MEM REQUEST
-liveperson-b2b-deploy    3           5Gi         1             1Gi
-liveperson-b360-deploy   3           5Gi         1             1Gi
-liveperson-deploy        3           5Gi         1             1Gi
-liveperson-vbg-deploy    3           5Gi         1             1Gi
-metrics-deploy           3           4Gi         1             1Gi
-py-metrics-deploy        3           5Gi         1             1Gi
-vecdialogflow-deploy     3           5Gi         1             1Gi
-liveperson-deploy is eating 10GB based on the replicas but only using 5GB total.
-we need to get these teams more in alignment with actual usage.
+After reviewing the current memory usage and limits, it appears that there is a significant discrepancy between the allocated limits and the actual usage. Here are the key findings:
+
+Current Limits vs. Actual Usage:
+
+The hard memory limit is set to 60Gi.
+Actual memory usage is less than half of the allocated limit, with a maximum usage of 35Gi over the past two weeks.
+Mismanagement of Requests and Limits:
+
+There is no shortage of resources; rather, the issue lies in the mismanagement of memory requests and limits.
+The deployments have been configured with higher limits than necessary, leading to inefficient resource utilization.
+Current Configuration:
+
+The following are the current CPU and memory configurations for the deployments:
+Recommendations:
+
+Adjust the memory limits in the manifests to better align with actual usage.
+Most of the pods do not require 5Gi to run efficiently. For example, liveperson-deploy is configured to use 10Gi based on replicas but only utilizes 5Gi in total.
+By reducing the memory limits, we can ensure more efficient use of available resources and prevent overallocation.
+Please review the above findings and consider adjusting the memory limits accordingly to optimize resource usage.
