@@ -1,0 +1,51 @@
+          if [ "$DEDICATED_CLUSTER_ENABLED" == "true" ]; then
+            DEDICATED_CLUSTER_NAME_UPPER=$(echo "$DEDICATED_CLUSTER_NAME" | tr '[:lower:]' '[:upper:]')
+            DEDICATED_CLUSTER_TOKEN=$(eval echo "\$${DEDICATED_CLUSTER_NAME_UPPER}_TOKEN")
+
+            if [ -z "$DEDICATED_CLUSTER_TOKEN" ]; then
+              echo "Unknown cluster: $DEDICATED_CLUSTER_NAME"
+              exit 1
+            fi
+            oc login --server https://$DEDICATED_CLUSTER_URL:6443 --token $DEDICATED_CLUSTER_TOKEN --insecure-skip-tls-verify
+            secretnames=()
+            endtime=$(date -ud "$runtime" +%s)
+            while [[ $(date -u +%s) -le $endtime && -z ${secretnames[@]} ]]
+            do
+                for n in $(oc get ns | grep -E "\b$VSAD-\w+-$APP\b" | awk '{print $1}'); 
+                    do 
+                    echo "Namespace: $n" ;
+                    secretnames=($(oc get secrets -l uuid=$UUID --no-headers -n $n --ignore-not-found | awk '{print $1}')) ;
+                    echo "Secretnames ${secretnames[0]}" ;
+                    
+                    if [ ! -z "${secretnames[0]}" ]; then
+                        echo "Compiling for secret: ${secretnames[0]}" ;
+                        namespacefromsecret=$(oc get secret ${secretnames[0]} -n $n --template={{.metadata.labels.namespace}})
+                        safromsecret=$(oc get secret ${secretnames[0]} -n $n --template={{.metadata.labels.serviceAccountName}})
+                        datacenterfromsecret=$(oc get secret ${secretnames[0]} -n $n --template={{.metadata.labels.datacenter}})
+                        token=$(oc get secret ${secretnames[0]} -n $n --template={{.data.token}} | base64 -d)
+                        JSON_FMT='{"namespace":"%s", "token":"%s", "serviceaccount":"%s", "datacenter":"%s"},\n'
+                        aggregate_secret_data+=("$(printf "$JSON_FMT" "$namespacefromsecret" "$token" "$safromsecret" "$datacenterfromsecret")"); 
+                        echo "found ${secretnames[0]} and adding it to aggregate_secret_data array" ;
+                    fi
+                done
+
+                if [ -z "${secretnames[@]}" ]; then
+                    echo "Time Now: `date +%H:%M:%S`";
+                    echo "$DEDICATED_CLUSTER_NAME: no secrets found with uuid=$UUID, sleeping for 30 seconds" ;
+                    sleep 30;
+                fi
+            done
+            oc logout
+          fi
+
+        - joined=$( IFS=$'\n'; echo "${aggregate_secret_data[*]}")
+        - joined=${joined%?} #remove final character (,)
+        - joined+="$(echo ])"
+        #- arrayVar=$( jq --compact-output --null-input '$ARGS.positional' --args -- "${joined[@]}") ;
+        #- echo ${arrayVar}
+        - oc login --server $TAMPA_PROD_HUB --token $TAMPA_PROD_HUB_TOKEN
+        - oc project appdev-gitops
+        - if [ ${#joined} -ge 5 ]; then oc create secret generic $UUID-claim-ticket --from-literal=data="$(echo "${joined}")" ; else echo "error creating claim ticket"; exit 0; fi
+        #- oc create secret generic $UUID-claim-ticket --from-literal=data="$(echo "${joined}")";
+        - echo '$(oc get secret $UUID-claim-ticket)'
+        - oc logout
