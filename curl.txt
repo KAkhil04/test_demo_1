@@ -1,34 +1,38 @@
 curl -X POST https://gitlab.verizon.com/api/v4/projects/227878/trigger/pipeline \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "token=40c7290465f3d4f8a9d0191925f8ca" \
-     -d "ref=master" \
-     -d "variables[NONPROD_OR_PROD]=prod" \
-     -d "variables[TSHIRT]=S" \
-     -d "variables[VSAD]=delb" \
-     -d "variables[DEV]=false" \
-     -d "variables[QA]=false" \
-     -d "variables[SIT]=false" \
-     -d "variables[STG]=false" \
-     -d "variables[UAT]=false" \
-     -d "variables[PREPROD]=false" \
-     -d "variables[GREENFIELD]=true" \
-     -d "variables[APP]=ple-delphi" \
-     -d "variables[SERVICEACCOUNT]=sacpdnts-delb-prod-ple-delphi-ocp-sa" \
-     -d "variables[TAMPA_ENABLED]=false" \
-     -d "variables[TWINSBURG_ENABLED]=false" \
-     -d "variables[SAC_ENABLED]=false" \
-     -d "variables[ADMIN_AD_GROUPS]=SDLC_KUBE_PROD_DELB_ADMIN" \
-     -d "variables[DEV_AD_GROUPS]= SDLC_KUBE_PROD_DELB_VIEW" \
-     -d "variables[AD_DOMAIN_USWIN]=SDLC_KUBE_PROD_DELB_ADMIN,SDLC_KUBE_PROD_DELB_VIEW" \
-     -d "variables[AD_DOMAIN_ADEBP]=" \
-     -d "variables[AD_DOMAIN_EMEA]=" \
-     -d "variables[AD_DOMAIN_VDSI]=" \
-     -d "variables[UUID]=" \
-     -d "variables[DEDICATED_CLUSTER_ENABLED]=true" \
-     -d "variables[DEDICATED_CLUSTER_OC_NAME]=sacpdocpntsj14v" \
-     -d "variables[DEDICATED_CLUSTER_URL]=api.sacpdocpntsj14v.verizon.com" \
-     -d "variables[DEDICATED_CLUSTER_NAME]=sacpdocpnts" \
-     -d "variables[DEDICATED_CLUSTER_SHORTNAME]=sacpdocpnts" \
-     -d "variables[ANNOTATIONS]=verizon.com/support-poc: dtix-dev@verizon.com" \
-     -d "variables[LABELS]=onboarding.verizon.io/vast: '19960',onboarding.verizon.io/vsad: DELB,onboarding.verizon.io/lob: NSIT" \
-     -d "id=227878"
+     -H "Content-Type: application/json" \
+     -d '{
+           "token": "40c7290465f3d4f8a9d0191925f8ca",
+           "ref": "master",
+           "variables": {
+             "NONPROD_OR_PROD": "prod",
+             "TSHIRT": "S",
+             "VSAD": "delb",
+             "DEV": "false",
+             "QA": "false",
+             "SIT": "false",
+             "STG": "false",
+             "UAT": "false",
+             "PREPROD": "false",
+             "GREENFIELD": "true",
+             "APP": "ple-delphi",
+             "SERVICEACCOUNT": "sacpdnts-delb-prod-ple-delphi-ocp-sa",
+             "TAMPA_ENABLED": "false",
+             "TWINSBURG_ENABLED": "false",
+             "SAC_ENABLED": "false",
+             "ADMIN_AD_GROUPS": "SDLC_KUBE_PROD_DELB_ADMIN",
+             "DEV_AD_GROUPS": "SDLC_KUBE_PROD_DELB_VIEW",
+             "AD_DOMAIN_USWIN": "SDLC_KUBE_PROD_DELB_ADMIN,SDLC_KUBE_PROD_DELB_VIEW",
+             "AD_DOMAIN_ADEBP": "",
+             "AD_DOMAIN_EMEA": "",
+             "AD_DOMAIN_VDSI": "",
+             "UUID": "",
+             "DEDICATED_CLUSTER_ENABLED": "true",
+             "DEDICATED_CLUSTER_OC_NAME": "sacpdocpntsj14v",
+             "DEDICATED_CLUSTER_URL": "api.sacpdocpntsj14v.verizon.com",
+             "DEDICATED_CLUSTER_NAME": "sacpdocpnts",
+             "DEDICATED_CLUSTER_SHORTNAME": "sacpdocpnts",
+             "ANNOTATIONS": "verizon.com/support-poc: dtix-dev@verizon.com",
+             "LABELS": "onboarding.verizon.io/vast: '19960',onboarding.verizon.io/vsad: DELB,onboarding.verizon.io/lob: NSIT"
+           },
+           "id": "227878"
+         }'
