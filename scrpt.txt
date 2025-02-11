@@ -1,1 +1,4 @@
-[Tue Feb 11 14:21:11 2025] Memory cgroup out of memory: Killed process 1348799 (java) total-vm:9536328kB, anon-rss:2547296kB, file-rss:52032kB, shmem-rss:0kB, UID:1000 pgtables:5756kB oom_score_adj:981
+Hello Team,
+Regarding https://onejira.verizon.com/browse/TOOLS-99263,
+
+We did our primary analysis and understand that the containers are getting restarted without even reaching the resource limits. We also don't see any node memory pressure. So, could you please go through the attached heapdump file to identify the memory leaks and high memory consumers. We also suggest you set the appropriate -Xms and -Xmx values and enable GC logging to get a fair idea on what's causing the issue
