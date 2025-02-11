@@ -1,0 +1,166 @@
+Wang, Siling added a comment - Yesterday
+I changed trail-design-save-ext prod deployment  with below changes:
+autoscaling: min: 4 (originally it is 2) max: 8
+
+resources:
+limits:
+cpu: "2250m"
+memory: 2500Mi  (originally it is 1500Mi)
+          requests:
+cpu: "1"
+memory: 2500Mi   (originally it is 1500Mi)
+
+Collapse comment: Beuershausen, Cary added a comment - 06/Feb/25 9:24 PM
+
+Beuershausen, Cary added a comment - 4 days ago
+Based on what I'm seeing in the cluster, almost every pod experiencing container restarts are doing so due to OOM conditions.
+
+NAME                                                   RESTARTS   REASON
+activation-rule-engine-prod-85479dd594-7c4kf          1           OOMKilled
+auto-assignment-prod-6886cc796c-9dzzn                 1           Error
+auto-design-ext-prod-846f9c6bbf-mt2g8                 2           OOMKilled
+bnc-notification-prod-6c7dd9d9bc-b4pq2                1           OOMKilled
+cac-rules-prod-747d68bb7d-78kzs                       1           Error
+contact-prod-59b996bbc6-rqc4k                         1           OOMKilled
+design-orchestration-prod-854bf8dc9b-bj8dd            1           OOMKilled
+diversity-config-data-prod-99d6bbfc7-62cp2            1           OOMKilled
+explicit-route-prod-57f5d7b65f-d55xx                  1           OOMKilled
+functional-audits-prod-85f8df65cd-qxvvz               1           OOMKilled
+functional-audits-prod-85f8df65cd-wtdg8               1           OOMKilled
+infra-parser-prod-6ff6b6d686-7rgxn                    1           Error
+inventory-prod-9688fd54-6vdmz                         3           Error
+inventory-updater-prod-d984bb975-8tj2d                1           OOMKilled
+l3-cron-jobs-prod-759976cd85-7hsht                    2           Error
+l3-network-service-validator-prod-664bfdd4b9-hqqpg    2           Error
+l3-queries-prod-d658b7d88-6jk6c                       2           Error
+l3-tyra-service-prod-5db5bbd6-mn2cd                   1           OOMKilled
+l3-web-prod-56784dd676-z9zhd                          5           OOMKilled
+lci-services-prod-9bccbbb94-2t25h                     3           OOMKilled
+lci-services-prod-9bccbbb94-pbqbp                     2           OOMKilled
+macro-service-ext-prod-5669bd4756-zgc6d               2           Error
+macro-service-prod-757f9964cf-5l6vt                   1           OOMKilled
+macro-service-prod-757f9964cf-7x6nl                   1           OOMKilled
+mcp-manager-prod-cf74fbb86-8qzl9                      1           OOMKilled
+mcp-manager-prod-cf74fbb86-wn4ph                      1           OOMKilled
+message-listener-prod-64d97fddd8-h7tsh                2           Error
+network-inspection-prod-6ddb4cf769-2rdww              3           Error
+nginx-prod-685c56f4b8-kk4ct                           2           OOMKilled
+nid-management-prod-6b5ddc7b94-d6snt                  1           OOMKilled
+orch-order-mgmt-prod-874b4f4b-zjx4d                   1           OOMKilled
+orch-web-interface-prod-59d594c56-txshb               3           Error
+order-notes-prod-b85c579fb-tgqb5                      1           OOMKilled
+orderno-generator-prod-57bbb7c84c-7s6fz               1           OOMKilled
+sb-simulator-prod-5d98fdcb8d-26gck                    1           OOMKilled
+segment-prod-6d99c5869c-ct4hq                         10          OOMKilled
+segment-prod-6d99c5869c-nxb6r                         15          OOMKilled
+service-activation-config-prod-ffdff98d7-4mf9m        2           OOMKilled
+service-configuration-prod-7f55d8cd48-jxng8           1           OOMKilled
+supervisor-prod-7dc949b9db-9hqtt                      1           OOMKilled
+topology-audit-prod-6fd6fbd999-fzx94                  2           OOMKilled
+topology-rule-engine-prod-976875887-bq57r             1           OOMKilled
+trail-attributes-prod-65c5fdbfb8-jbcnh                2           OOMKilled
+trail-autodesign-handler-prod-586cb5b79c-ffxhp        4           OOMKilled
+trail-bgp-prod-5c6c4d5f97-ht4j8                       1           Error
+trail-design-save-ext-prod-677fd9d4b9-5m62r           18          OOMKilled
+trail-design-save-ext-prod-677fd9d4b9-lbl2p           16          OOMKilled
+trail-design-save-ext-prod-677fd9d4b9-lsm98           22          OOMKilled
+trail-design-save-ext-prod-677fd9d4b9-zht9v           6           OOMKilled
+trail-discovery-prod-58844d878b-7b9bd                 13          OOMKilled
+trail-discovery-prod-58844d878b-srtdf                 11          OOMKilled
+trail-meta-prod-69f5f55cf9-dh9gd                      1           OOMKilled
+trail-notes-prod-57bdd8cb6c-hrrpl                     1           OOMKilled
+trail-reporting-prod-6b8f4d4d56-c8dbn                 1           Error
+trail-reservation-prod-859576d756-swr78               1           OOMKilled
+trail-riders-prod-7f9f6bd965-x687q                    2           OOMKilled
+trail-validator-prod-584cbfb464-nhg9v                 1           OOMKilled
+vmb-notification-prod-58dc5fd6f8-z5r92                1           OOMKilled
+vnm-manager-ext-prod-6d9d7cbb8f-7psw7                 1           OOMKilled
+vnm-manager-ext-prod-6d9d7cbb8f-hvml4                 1           Error
+vpn-site-prod-7b987fdb9-5gbhj                         1           OOMKilled
+
+Collapse comment: Hasti, Damodar added a comment - 06/Feb/25 8:15 PM
+
+Hasti, Damodar added a comment - 4 days ago
+Services are restarting without any need and we are loosing many requests while processing. Following are restarted today 2/6/2025 so far.
+
+orch-prov-service
+transaction-audit
+orch-order-mgmt
+trail-search
+l3-web
+trail-clr
+diversity-retention-scheduler
+hotcut
+trail-riders
+auto-assignment
+cac-rules
+epnmrconf-manager
+error-map
+inventory-adapter
+l3-lidata-service
+orch-cron-jobs
+orch-listener-service
+service-utilities
+topology-audit
+trail-notify
+
+Collapse comment: Bade, Vasudevulu added a comment - 05/Feb/25 9:59 PM, Edited by Bade, Vasudevulu - 05/Feb/25 10:08 PM
+
+Bade, Vasudevulu added a comment - 5 days ago - edited
+Brackett, Daryl A Beuershausen, Cary 
+
+Here is an another instance, could you please check what made to auto scale l3-pip-service? 
+
+from Feb1st to 5th , it scaled up 29 times times and scaled down 31 times.
+
+But auto scaling thresholds were never reached, could you please help us to understand what is causing new pods to be created and dropped when current pods are not even reaching auto scaling thresholds.
+
+Also when pods are scaling down , is there anyway OCP can make sure there are not inflight requests currently being processed by pods?
+
+Its causing too many issues in application, because without a need pods are creating creating and dropping.
+
+
+
+Collapse comment: Wang, Siling added a comment - 05/Feb/25 4:45 PM
+
+Wang, Siling added a comment - 5 days ago
+I can't check why all pods for one app restarted at same time. Only OCP team can check it.
+
+
+Collapse comment: Maale, Tejasri added a comment - 05/Feb/25 4:21 PM
+
+Maale, Tejasri added a comment - 5 days ago
+Wang, Siling Could you pls check on why that liveliness probe failed which caused the pod restart. WE still see intermittent issues with trail-design-save-ext connection in PROD.
+
+
+Collapse comment: Brackett, Daryl A added a comment - 31/Jan/25 7:45 PM
+
+Brackett, Daryl A added a comment - 31/Jan/25 7:45 PM
+Hi Maale, Tejasri
+
+As I pinged you via slack the liveness probe is failing and thats where you need to investigate.  Once that fails as in connection refused the pod will restart.  Kubernetes by nature is for applications that can withstand pods restart from a number of reasons from moving nodes to platform upgrades or issues with connections.  Your application must be able to withstand a pod going down. 
+
+ This IP address is refusing connection - 10.129.25.173.  Please take a look at this endpoint logs to understand why connection is being refused.  
+
+Also what the timeout value is set at for this endpoint
+
+
+Collapse comment: Maale, Tejasri added a comment - 31/Jan/25 7:22 PM
+
+Maale, Tejasri added a comment - 31/Jan/25 7:22 PM
+Yes The restart time aligned with the fallout occurrence time for the Jan 30th data points. There are multiple source apps from which the trail-design-save-ext is called. Sample sources are : auto-assignment, design-orchestration.
+We dont see this issue in non-prod environments but very frequently in PROD.
+
+Collapse comment: Beuershausen, Cary added a comment - 31/Jan/25 6:25 PM
+
+Beuershausen, Cary added a comment - 31/Jan/25 6:25 PM
+Maale, Tejasri The platform team doesn't have any insight into how the app is architected. Additional details would probably be helpful. I assume trail-design-save-ext is the destination. What's the source? Is this a new problem? Do you see the issue in lower environments? The containers are all restarting. Do the restart times align with the failures you're seeing?
+
+
+Collapse comment: Maale, Tejasri added a comment - 30/Jan/25 9:16 PM
+
+Maale, Tejasri added a comment - 30/Jan/25 9:16 PM
+The most recent fallout Jan 30th. All 4 pods are restarted at the same time.
+77m Normal Created pod/trail-design-save-ext-prod-677fd9d4b9-5m62r Created container trail-design-save-ext
+77m Normal Started pod/trail-design-save-ext-prod-677fd9d4b9-5m62r Started container trail-design-save-ext
+76m Warning Unhealthy pod/trail-design-save-ext-prod-677fd9d4b9-5m62r Startup probe failed: Get "http://10.129.25.173:8080/actuator/health/liveness": dial tcp 10.129.25.173:8080: connect: connection refused
