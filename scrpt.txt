@@ -1,4 +1,7 @@
 Hello Team,
-Regarding https://onejira.verizon.com/browse/TOOLS-99263,
 
-We did our primary analysis and understand that the containers are getting restarted without even reaching the resource limits. We also don't see any node memory pressure. So, could you please go through the attached heapdump file to identify the memory leaks and high memory consumers. We also suggest you set the appropriate -Xms and -Xmx values and enable GC logging to get a fair idea on what's causing the issue
+Regarding TOOLS-99263,
+
+We conducted a preliminary analysis and found that the containers are restarting without reaching the resource limits. Additionally, there is no indication of node memory pressure.
+
+Could you please review the attached heapdump.hprof file to identify any memory leaks and high memory consumers? We also recommend setting appropriate -Xms and -Xmx values and enabling GC logging to better understand the root cause of the OOMKilled issue.
