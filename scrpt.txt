@@ -1,8 +1,19 @@
+# Define the output CSV file
+output_file="max_map_count.csv"
+
+# Write the header to the CSV file
+echo "node_name,max_map_count" > $output_file
+
 # Get the list of all node names
 nodes=$(oc get nodes -o jsonpath='{.items[*].metadata.name}')
 
 # Loop through each node and check the vm.max_map_count value
 for node in $nodes; do
-  echo "Node: $node"
-  oc debug node/$node -- chroot /host cat /proc/sys/vm/max_map_count
+  # Get the max_map_count value
+  max_map_count=$(oc debug node/$node -- chroot /host cat /proc/sys/vm/max_map_count)
+  
+  # Write the node name and max_map_count value to the CSV file
+  echo "$node,$max_map_count" >> $output_file
 done
+
+echo "Output written to $output_file"
