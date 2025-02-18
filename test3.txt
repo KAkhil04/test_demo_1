@@ -24,3 +24,19 @@ they can't fail us on best practices. it's not a check to make sure a setting is
       rationale: N/A
     - name: ocp4-accounts-unique-service-account
       rationale: N/A
+
+
+- name: ocp4-general-namespaces-in-use
+  rationale: This rule is a best practice recommendation and not a mandatory compliance check. We manage namespaces according to our internal policies and procedures.
+
+- name: ocp4-rbac-least-privilege
+  rationale: This rule is a best practice recommendation. We manage RBAC through ADOM/RBAC to ensure least-privilege access is maintained.
+
+- name: ocp4-rbac-limit-cluster-admin
+  rationale: This rule is a best practice recommendation. We manage cluster admin access via ADOM/RBAC, ensuring that only necessary users and groups have cluster-admin access.
+
+- name: ocp4-rbac-limit-secrets-access
+  rationale: This rule is a best practice recommendation. We manage access to secrets through ADOM/RBAC, providing two RBAC levels: namespace admin and developer. Admins can manage secrets within their namespace only, while developers cannot see secrets.
+
+- name: ocp4-accounts-unique-service-account
+  rationale: This rule is a best practice recommendation. We manage service accounts according to our internal policies and procedures to ensure unique service accounts are used where necessary.
