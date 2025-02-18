@@ -46,50 +46,50 @@ they can't fail us on best practices. it's not a check to make sure a setting is
 
 
 
-  - name: ocp4-accounts-unique-service-account
-    rationale: N/A
+- name: ocp4-accounts-unique-service-account
+  rationale: This rule is a best practice recommendation. We manage service accounts according to our internal policies and procedures to ensure unique service accounts are used where necessary.
 
-  - name: ocp4-general-default-namespace-use
-    rationale: Restricted via RBAC
+- name: ocp4-general-default-namespace-use
+  rationale: Restricted via RBAC. Access to the default namespace is controlled through our RBAC policies to ensure proper usage and prevent unauthorized access.
 
-  - name: ocp4-general-namespaces-in-use
-    rationale: N/A
+- name: ocp4-general-namespaces-in-use
+  rationale: This rule is a best practice recommendation. We manage namespaces according to our internal policies and procedures to ensure proper usage and organization.
 
-  - name: ocp4-rbac-least-privilege
-    rationale: N/A
+- name: ocp4-rbac-least-privilege
+  rationale: This rule is a best practice recommendation. We enforce least-privilege access through ADOM/RBAC to ensure users and service accounts have only the permissions they need.
 
-  - name: ocp4-rbac-limit-cluster-admin
-    rationale: N/A
+- name: ocp4-rbac-limit-cluster-admin
+  rationale: This rule is a best practice recommendation. Cluster admin access is managed via ADOM/RBAC, ensuring that only necessary users and groups have cluster-admin access, and regular reviews are conducted to maintain security.
 
-  - name: ocp4-rbac-limit-secrets-access
-    rationale: N/A
+- name: ocp4-rbac-limit-secrets-access
+  rationale: This rule is a best practice recommendation. Access to secrets is managed through ADOM/RBAC, with two RBAC levels: namespace admin and developer. Namespace admins can manage secrets within their namespace only, while developers cannot access secrets.
 
-  - name: ocp4-rbac-pod-creation-access
-    rationale: Restricted to admin group via RBAC.
+- name: ocp4-rbac-pod-creation-access
+  rationale: Restricted to admin group via RBAC. Pod creation access is controlled through RBAC policies, ensuring that only authorized admin users can create pods.
 
-  - name: ocp4-scc-limit-net-raw-capability
-    rationale: Enforced via Gatekeeper k8spspcapabilities policy
+- name: ocp4-scc-limit-net-raw-capability
+  rationale: Enforced via Gatekeeper k8spspcapabilities policy. We use Gatekeeper policies to enforce restrictions on the NET_RAW capability, preventing containers from using raw sockets.
 
-  - name: ocp4-scc-limit-privilege-escalation
-    rationale: Enforced via Gatekeeper k8spspallowprivilegeescalationcontainer policy
+- name: ocp4-scc-limit-privilege-escalation
+  rationale: Enforced via Gatekeeper k8spspallowprivilegeescalationcontainer policy. We use Gatekeeper policies to prevent privilege escalation within containers, ensuring a secure runtime environment.
 
-  - name: ocp4-scc-limit-privileged-containers
-    rationale: Enforced via Gatekeeper k8spspprivilegedcontainer policy
+- name: ocp4-scc-limit-privileged-containers
+  rationale: Enforced via Gatekeeper k8spspprivilegedcontainer policy. We use Gatekeeper policies to restrict the use of privileged containers, reducing the risk of security breaches.
 
-  - name: ocp4-scc-limit-root-containers
-    rationale: Enforced via Gatekeeper k8spspallowedusers policy
+- name: ocp4-scc-limit-root-containers
+  rationale: Enforced via Gatekeeper k8spspallowedusers policy. We use Gatekeeper policies to limit the use of root containers, ensuring that containers run with the least privileges necessary.
 
-  - name: ocp4-audit-profile-set
-    rationale: Not really a failure, just a check of what value is set
+- name: ocp4-audit-profile-set
+  rationale: Not really a failure, just a check of what value is set. This rule is informational and checks the audit profile configuration, which is managed according to our internal policies.
 
-  - name: ocp4-ocp-allowed-registries
-    rationale: Enforced via Gatekeeper k8sallowedrepos policy
+- name: ocp4-ocp-allowed-registries
+  rationale: Enforced via Gatekeeper k8sallowedrepos policy. We use Gatekeeper policies to enforce restrictions on allowed container image registries, ensuring that only trusted sources are used.
 
-  - name: ocp4-ocp-allowed-registries-for-import
-    rationale: Enforced via Gatekeeper k8sallowedrepos policy
+- name: ocp4-ocp-allowed-registries-for-import
+  rationale: Enforced via Gatekeeper k8sallowedrepos policy. We use Gatekeeper policies to enforce restrictions on allowed registries for image imports, ensuring that only trusted sources are used.
 
-  - name: ocp4-scc-limit-container-allowed-capabilities
-    rationale: Managed via Gatekeeper policy
+- name: ocp4-scc-limit-container-allowed-capabilities
+  rationale: Managed via Gatekeeper policy. We use Gatekeeper policies to manage and restrict the capabilities that containers are allowed to use, enhancing security.
 
-  - name: ocp4-audit-log-forwarding-enabled
-    rationale: We use elastic-agent instead of clusterlogforwarder
+- name: ocp4-audit-log-forwarding-enabled
+  rationale: We use elastic-agent instead of clusterlogforwarder. Our audit log forwarding is managed through elastic-agent, providing a robust and flexible logging solution.
