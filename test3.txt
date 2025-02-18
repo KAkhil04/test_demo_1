@@ -40,3 +40,56 @@ they can't fail us on best practices. it's not a check to make sure a setting is
 
 - name: ocp4-accounts-unique-service-account
   rationale: This rule is a best practice recommendation. We manage service accounts according to our internal policies and procedures to ensure unique service accounts are used where necessary.
+
+
+
+
+
+
+  - name: ocp4-accounts-unique-service-account
+    rationale: N/A
+
+  - name: ocp4-general-default-namespace-use
+    rationale: Restricted via RBAC
+
+  - name: ocp4-general-namespaces-in-use
+    rationale: N/A
+
+  - name: ocp4-rbac-least-privilege
+    rationale: N/A
+
+  - name: ocp4-rbac-limit-cluster-admin
+    rationale: N/A
+
+  - name: ocp4-rbac-limit-secrets-access
+    rationale: N/A
+
+  - name: ocp4-rbac-pod-creation-access
+    rationale: Restricted to admin group via RBAC.
+
+  - name: ocp4-scc-limit-net-raw-capability
+    rationale: Enforced via Gatekeeper k8spspcapabilities policy
+
+  - name: ocp4-scc-limit-privilege-escalation
+    rationale: Enforced via Gatekeeper k8spspallowprivilegeescalationcontainer policy
+
+  - name: ocp4-scc-limit-privileged-containers
+    rationale: Enforced via Gatekeeper k8spspprivilegedcontainer policy
+
+  - name: ocp4-scc-limit-root-containers
+    rationale: Enforced via Gatekeeper k8spspallowedusers policy
+
+  - name: ocp4-audit-profile-set
+    rationale: Not really a failure, just a check of what value is set
+
+  - name: ocp4-ocp-allowed-registries
+    rationale: Enforced via Gatekeeper k8sallowedrepos policy
+
+  - name: ocp4-ocp-allowed-registries-for-import
+    rationale: Enforced via Gatekeeper k8sallowedrepos policy
+
+  - name: ocp4-scc-limit-container-allowed-capabilities
+    rationale: Managed via Gatekeeper policy
+
+  - name: ocp4-audit-log-forwarding-enabled
+    rationale: We use elastic-agent instead of clusterlogforwarder
