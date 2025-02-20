@@ -1,1 +1,32 @@
 oc get pods -A -o json | jq -r '.items | group_by(.spec.nodeName) | map({node: (.[0].spec.nodeName // "N/A"), container_count: map(.spec.containers | length) | add}) | (["Node", "ContainerCount"], (.[] | [.node, (.container_count | tostring)])) | @csv'
+
+
+
+
+#!/bin/bash
+
+# Get the pods information and process it with jq
+oc get pods -A -o json | jq -r '
+  .items | group_by(.spec.nodeName) |
+  map({
+    node: (.[0].spec.nodeName // "N/A"),
+    container_count: map(.spec.containers | length) | add
+  }) | (["Node", "ContainerCount"], (.[] | [.node, (.container_count | tostring)])) | @csv
+' > temp_output.csv
+
+# Extract the cluster name from the first node name
+cluster_name=$(head -n 2 temp_output.csv | tail -n 1 | cut -d ',' -f 1 | cut -d '-' -f 1)
+
+# Calculate the total container count
+total_count=$(tail -n +2 temp_output.csv | cut -d ',' -f 2 | paste -sd+ | bc)
+
+# Create the final output file
+{
+  echo "Cluster,Node,ContainerCount"
+  echo "$cluster_name,,"
+  tail -n +2 temp_output.csv
+  echo ",Total,$total_count"
+} > output.csv
+
+# Clean up the temporary file
+rm temp_output.csv
