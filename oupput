@@ -5,28 +5,50 @@ oc get pods -A -o json | jq -r '.items | group_by(.spec.nodeName) | map({node: (
 
 #!/bin/bash
 
-# Get the pods information and process it with jq
-oc get pods -A -o json | jq -r '
-  .items | group_by(.spec.nodeName) |
-  map({
-    node: (.[0].spec.nodeName // "N/A"),
-    container_count: map(.spec.containers | length) | add
-  }) | (["Node", "ContainerCount"], (.[] | [.node, (.container_count | tostring)])) | @csv
-' > temp_output.csv
+# Prompt for environment type
+read -p "Is this for nonprod or prod? " env_type
 
-# Extract the cluster name from the first node name
-cluster_name=$(head -n 2 temp_output.csv | tail -n 1 | cut -d ',' -f 1 | cut -d '-' -f 1)
+# Check if the environment type is valid
+if [[ "$env_type" != "nonprod" && "$env_type" != "prod" ]]; then
+  echo "Invalid environment type. Please enter 'nonprod' or 'prod'."
+  exit 1
+fi
 
-# Calculate the total container count
-total_count=$(tail -n +2 temp_output.csv | cut -d ',' -f 2 | paste -sd+ | bc)
+# Prompt for the input file name
+read -p "Enter the input file name: " input_file
 
-# Create the final output file
-{
-  echo "Cluster,Node,ContainerCount"
-  echo "$cluster_name,,"
-  tail -n +2 temp_output.csv
-  echo ",Total,$total_count"
-} > output.csv
+# Check if the input file exists
+if [[ ! -f "$input_file" ]]; then
+  echo "Input file not found: $input_file"
+  exit 1
+fi
 
-# Clean up the temporary file
-rm temp_output.csv
+# Set the base URL based on the environment type
+if [[ "$env_type" == "prod" ]]; then
+  base_url="https://api.%s.xyz.com:6443"
+else
+  base_url="https://api.%s.ebiz.xyz.com:6443"
+fi
+
+# Read the cluster names from the file
+while IFS= read -r cluster_name; do
+  # Login to the cluster
+  oc login $(printf "$base_url" "$cluster_name") -u kurelak -p "R@nch0@123"
+
+  # Check if login was successful
+  if [[ $? -ne 0 ]]; then
+    echo "Failed to login to cluster $cluster_name"
+    continue
+  fi
+
+  # Get the pods information and save it as a CSV file
+  oc get pods -A -o json | jq -r '
+    .items | group_by(.spec.nodeName) |
+    map({
+      node: (.[0].spec.nodeName // "N/A"),
+      container_count: map(.spec.containers | length) | add
+    }) | (["Node", "ContainerCount"], (.[] | [.node, (.container_count | tostring)])) | @csv
+  ' > "${cluster_name}.csv"
+
+  echo "Data for cluster $cluster_name saved to ${cluster_name}.csv"
+done < "$input_file"
