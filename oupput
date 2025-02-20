@@ -1,4 +1,1 @@
-oc get pods -A -o json | jq -r '.items | group_by(.spec.nodeName) | map({node: (.[0].spec.nodeName // "N/A"), container_count: map(.spec.containers | length) | add}) | (["Node", "ContainerCount"] | (., map("-"))), (.[] | [.node, (.container_count | tostring)]) | @csv'
-jq: error: syntax error, unexpected INVALID_CHARACTER, expecting end of file (Unix shell quoting issues?) at <top-level>, line 1:
-.items | group_by(.spec.nodeName) | map({node: (.[0].spec.nodeName // "N/A"), container_count: map(.spec.containers | length) | add}) | (["Node", "ContainerCount"] | (., map("-"))), (.[] | [.node, (.container_count | tostring)]) | @csv  
-jq: 1 compile error
+oc get pods -A -o json | jq -r '.items | group_by(.spec.nodeName) | map({node: (.[0].spec.nodeName // "N/A"), container_count: map(.spec.containers | length) | add}) | (["Node", "ContainerCount"], (.[] | [.node, (.container_count | tostring)])) | @csv'
