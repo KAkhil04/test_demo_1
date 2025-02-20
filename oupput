@@ -1,3 +1,1 @@
-Found cluster name: tdcnpocpntsj14v in file: dedicated/c2av/bgw/c2av-dev-bgw.yaml
-Creating argoApps directory: dedicated/tdcnpocpntsj14v/argoApps
-Source YAML file Dedicated/argoApps/dedicated-c2av-nonprod-Dedicated.yaml not found
+oc get pods -A -o json | jq -r '.items | group_by(.spec.nodeName) | map({node: (.[0].spec.nodeName // "N/A"), container_count: map(.spec.containers | length) | add}) | (["Node", "ContainerCount"] | (., map("-"))), (.[] | [.node, (.container_count | tostring)]) | @csv'
