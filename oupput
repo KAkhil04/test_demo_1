@@ -1,1 +1,1 @@
-oc get pods -A -o json | jq -r '.items | group_by(.spec.nodeName) | map({node: (.[0].spec.nodeName // "N/A"), container_count: map(.spec.containers | length) | add}) | (["Node", "ContainerCount"] | (., map("-"))), (.[] | [.node, (.container_count | tostring)]) | @csv'
+oc get pods -A -o json | jq -r '.items | group_by(.spec.nodeName) | map({node: (.[0].spec.nodeName // "N/A"), container_count: map(.spec.containers | length) | add}) | (["Node", "ContainerCount"] | (., map(length*"-"))), (.[] | [.node, (.container_count | tostring)]) | @csv'
