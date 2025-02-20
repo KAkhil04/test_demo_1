@@ -52,3 +52,66 @@ while IFS= read -r cluster_name; do
 
   echo "Data for cluster $cluster_name saved to ${cluster_name}.csv"
 done < "$input_file"
+
+
+
+
+
+
+
+
+
+
+#!/bin/bash
+
+# Prompt for environment type
+read -p "Is this for nonprod or prod? " env_type
+
+# Check if the environment type is valid
+if [[ "$env_type" != "nonprod" && "$env_type" != "prod" ]]; then
+  echo "Invalid environment type. Please enter 'nonprod' or 'prod'."
+  exit 1
+fi
+
+# Prompt for the input file name
+read -p "Enter the input file name: " input_file
+
+# Check if the input file exists
+if [[ ! -f "$input_file" ]]; then
+  echo "Input file not found: $input_file"
+  exit 1
+fi
+
+# Set the base URL based on the environment type
+if [[ "$env_type" == "prod" ]]; then
+  base_url="https://api.%s.xyz.com:6443"
+else
+  base_url="https://api.%s.ebiz.xyz.com:6443"
+fi
+
+# Create the output CSV file and add the header
+output_file="clusters_data.csv"
+echo "Cluster,Node,ContainerCount" > "$output_file"
+
+# Read the cluster names from the file
+while IFS= read -r cluster_name; do
+  # Login to the cluster
+  oc login $(printf "$base_url" "$cluster_name") -u kurelak -p "R@nch0@123"
+
+  # Check if login was successful
+  if [[ $? -ne 0 ]]; then
+    echo "Failed to login to cluster $cluster_name"
+    continue
+  fi
+
+  # Get the pods information and append it to the CSV file
+  oc get pods -A -o json | jq -r --arg cluster "$cluster_name" '
+    .items | group_by(.spec.nodeName) |
+    map({
+      node: (.[0].spec.nodeName // "N/A"),
+      container_count: map(.spec.containers | length) | add
+    }) | (.[] | [$cluster, .node, (.container_count | tostring)]) | @csv
+  ' >> "$output_file"
+
+  echo "Data for cluster $cluster_name appended to $output_file"
+done < "$input_file"
