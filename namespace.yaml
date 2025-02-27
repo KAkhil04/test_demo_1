@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "namespace.name" . }}
+  annotations:
+    openshift.io/description: {{ .Values.namespace.description }}
+    openshift.io/display-name: {{ include "namespace.name" . }}
+    argocd.argoproj.io/sync-wave: "-4"
+    openshift.io/sa.scc.mcs: s0:c32,c4
+    openshift.io/sa.scc.supplemental-groups: 1001000000/10000
+    openshift.io/sa.scc.uid-range: 1001000000/10000
+    {{- if .Values.annotations -}}
+    {{- $top := . -}}
+    {{- range .Values.annotations }}
+    {{ tpl . $top }}
+    {{- end }}
+    {{- end }}
+  labels:
+    onboarding.verizon.io/datacenter: {{ .Values.datacenter }}
+    kubernetes.io/metadata.name: {{ include "namespace.name" . }}
+    onboarding.verizon.io/tshirt-size: {{ include "labels.tshirt" . }}
+    {{- if .Values.labels -}}
+    {{- $top := . -}}
+    {{- range .Values.labels }}  
+    {{ tpl . $top }} 
+    {{- end }}
+    {{- end }}
