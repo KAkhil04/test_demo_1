@@ -1,0 +1,222 @@
+vsad: vsad
+appId: app
+env: prod
+
+datacenter: sacramento
+datacenter_shortname: SAC
+datacenter_url: www
+
+labels: {}
+annotations: {}
+uuid: abc1234
+serviceAccountSecretNS: appdev-gitops
+
+namespace:
+  description: "description of namespace"
+#  displayName: displayName
+
+
+serviceAccount:
+  create: true
+  name: serviceAccountName
+
+tshirt: 
+greenfield: false
+
+small:
+  resourceQuota:
+    hard:
+      requests:
+        cpu: 1
+        memory: 0.0700Gi
+      limits:
+        cpu: 1
+        memory: 0.0700Gi
+  limitRange:
+    container:
+      max:
+        cpu: 1
+        memory: 0.0700Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+    pod:
+      max:
+        cpu: 1
+        memory: 0.0700Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+
+medium:
+  resourceQuota:
+    hard:
+      requests:
+        cpu: 1
+        memory: 0.3800Gi
+      limits:
+        cpu: 1
+        memory: 0.3800Gi
+  limitRange:
+    container:
+      max:
+        cpu: 1
+        memory: 0.3800Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+    pod:
+      max:
+        cpu: 1
+        memory: 0.3800Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+
+large:
+  resourceQuota:
+    hard:
+      requests:
+        cpu: 1
+        memory: 0.6600Gi
+      limits:
+        cpu: 1
+        memory: 0.6600Gi
+  limitRange:
+    container:
+      max:
+        cpu: 1
+        memory: 0.6600Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+    pod:
+      max:
+        cpu: 1
+        memory: 0.6600Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+
+xLarge:
+  resourceQuota:
+    hard:
+      requests:
+        cpu: 2
+        memory: 1.9900Gi
+      limits:
+        cpu: 2
+        memory: 1.9900Gi
+  limitRange:
+    container:
+      max:
+        cpu: 2
+        memory: 1.9900Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+    pod:
+      max:
+        cpu: 2
+        memory: 1.9900Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+
+xxLarge:
+  resourceQuota:
+    hard:
+      requests:
+        cpu: 8
+        memory: 7.3300Gi
+      limits:
+        cpu: 8
+        memory: 7.3300Gi
+  limitRange:
+    container:
+      max:
+        cpu: 8
+        memory: 7.3300Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+    pod:
+      max:
+        cpu: 8
+        memory: 7.3300Gi
+      min:
+        cpu: .000015622
+        memory: .00006Gi
+      default:
+        cpu: .4492
+        memory: 0.0700Gi
+      defaultRequest:
+        cpu: .25
+        memory: .00175Gi 
+
+
+rolebindings:
+  admin:
+    subjects:
+      name:
+      - FILLTHISIN_{{ .Values.vsad }}_ADMIN
+
+  dev:
+    subjects:
+      name:
+      - FILLTHISIN_{{ .Values.vsad }}_VIEW
+      
