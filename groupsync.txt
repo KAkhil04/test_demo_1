@@ -97,3 +97,10 @@ install.go:231: [debug] CHART PATH: C:\Users\kurelak\Documents\GitLab\onboarding
 
 Error: template: managed-groupsyncs/templates/groupsync.yaml:19:11: executing "managed-groupsyncs/templates/groupsync.yaml" at <$.Files.Lines>: error calling Lines: runtime error: index out of range [-1]     
 helm.go:84: [debug] template: managed-groupsyncs/templates/groupsync.yaml:19:11: executing "managed-groupsyncs/templates/groupsync.yaml" at <$.Files.Lines>: error calling Lines: runtime error: index out of range [-1]
+
+
+
+
+
+
+ComparisonError: Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = Manifest generation error (cached): `helm template . --name-template tpapdocpntsj14v-groupsync --namespace group-sync-operator --kube-version 1.27 --set clusterName=tpapdocpntsj14v --values <path to cached source>/groupsync/values.yaml <api versions removed> --include-crds` failed exit status 1: Error: template: managed-groupsyncs/templates/groupsync.yaml:19:11: executing "managed-groupsyncs/templates/groupsync.yaml" at <$.Files.Lines>: error calling Lines: runtime error: index out of range [-1] Use --debug flag to render out invalid YAML
