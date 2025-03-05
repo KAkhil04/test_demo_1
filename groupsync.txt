@@ -104,3 +104,100 @@ helm.go:84: [debug] template: managed-groupsyncs/templates/groupsync.yaml:19:11:
 
 
 ComparisonError: Failed to load target state: failed to generate manifest for source 1 of 1: rpc error: code = Unknown desc = Manifest generation error (cached): `helm template . --name-template tpapdocpntsj14v-groupsync --namespace group-sync-operator --kube-version 1.27 --set clusterName=tpapdocpntsj14v --values <path to cached source>/groupsync/values.yaml <api versions removed> --include-crds` failed exit status 1: Error: template: managed-groupsyncs/templates/groupsync.yaml:19:11: executing "managed-groupsyncs/templates/groupsync.yaml" at <$.Files.Lines>: error calling Lines: runtime error: index out of range [-1] Use --debug flag to render out invalid YAML
+
+
+
+debug
+---------------------------------------------------------------------------------
+
+{{- $clusterName := .Values.clusterName }}
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: GroupSync
+metadata:
+  name: ldap-adom-groupsync-{{ $clusterName }}
+  namespace: group-sync-operator
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  schedule: "0 */4 * * *"
+  providers:
+{{- range .Values.domains }}
+{{- $domain := .domain }}
+{{- $groupbdn := .groupsBaseDN }}
+{{- $userbdn := .userBaseDN }}
+{{- $secret := .caSecretName }}
+{{- $url := .url }}
+{{- $concatFilter := "" }}
+{{- $filePath := printf "groups/%s-%s.data" $clusterName $domain }}
+{{- if $.Files.Get $filePath }}
+{{- range $.Files.Lines $filePath }}
+{{- $concatFilter = printf "%s(cn=%s)" $concatFilter . }}
+{{- end }}
+  - name: ldap-adom-{{ $domain }}
+    ldap:
+      url: {{ $url }}
+      credentialsSecret:
+        name: {{ $domain }}-ldap-group-sync
+        namespace: group-sync-operator
+      insecure: false
+      prune: true
+      ca:
+        kind: Secret
+        name: ldap-certs-{{ $domain }}
+        namespace: group-sync-operator
+        key: ca.crt
+      rfc2307:
+        groupsQuery:
+          baseDN: {{ $groupbdn | quote }}
+          scope: sub
+          derefAliases: never
+          filter: (|{{ $concatFilter }})
+          pageSize: 0
+        tolerateMemberNotFoundErrors: true
+        tolerateMemberOutOfScopeErrors: true
+        groupUIDAttribute: dn
+        groupNameAttributes: [ cn ]
+        usersQuery:
+          baseDN: {{ $userbdn | quote }}
+          scope: sub
+          derefAliases: never
+          pageSize: 0
+        userNameAttributes: [ sAMAccountName ]
+        userUIDAttribute: dn
+        groupMembershipAttributes: [ member ]
+{{- else }}
+  # File not found, skipping domain {{ $domain }}
+  - name: ldap-adom-{{ $domain }}
+    ldap:
+      url: {{ $url }}
+      credentialsSecret:
+        name: {{ $domain }}-ldap-group-sync
+        namespace: group-sync-operator
+      insecure: false
+      prune: true
+      ca:
+        kind: Secret
+        name: ldap-certs-{{ $domain }}
+        namespace: group-sync-operator
+        key: ca.crt
+      rfc2307:
+        groupsQuery:
+          baseDN: {{ $groupbdn | quote }}
+          scope: sub
+          derefAliases: never
+          filter: (|(cn=example)) # Placeholder filter
+          pageSize: 0
+        tolerateMemberNotFoundErrors: true
+        tolerateMemberOutOfScopeErrors: true
+        groupUIDAttribute: dn
+        groupNameAttributes: [ cn ]
+        usersQuery:
+          baseDN: {{ $userbdn | quote }}
+          scope: sub
+          derefAliases: never
+          pageSize: 0
+        userNameAttributes: [ sAMAccountName ]
+        userUIDAttribute: dn
+        groupMembershipAttributes: [ member ]
+{{- end }}
+{{- end }}
