@@ -1,0 +1,99 @@
+groupsync.yaml
+--------------------------------------------------------------------
+{{- $clusterName := .Values.clusterName}}
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: GroupSync
+metadata:
+  name: ldap-adom-groupsync-{{ $clusterName }}
+  namespace: group-sync-operator
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  schedule: "0 */4 * * *"
+  providers:
+{{- range .Values.domains }}
+{{- $domain := .domain }}
+{{- $groupbdn := .groupsBaseDN }}
+{{- $userbdn := .userBaseDN }}
+{{- $secret := .caSecretName }}
+{{- $url := .url }}
+{{- $concatFilter := "" }}
+{{- range $.Files.Lines (printf "groups/%s-%s.data" $clusterName $domain)}}
+{{- $concatFilter = printf "%s(cn=%s)" $concatFilter . }}
+{{- end }}
+  - name: ldap-adom-{{ $domain }}
+    ldap:
+      url: {{ $url }}
+      credentialsSecret:
+        name: {{ $domain }}-ldap-group-sync
+        namespace: group-sync-operator
+      insecure: false
+      prune: true
+      ca:
+        kind: Secret
+        name: ldap-certs-{{ $domain }}
+        namespace: group-sync-operator
+        key: ca.crt
+      rfc2307:
+        groupsQuery:
+          baseDN: {{ $groupbdn | quote }}
+          scope: sub
+          derefAliases: never
+          filter: (|{{ $concatFilter }})
+          pageSize: 0
+        tolerateMemberNotFoundErrors: true
+        tolerateMemberOutOfScopeErrors: true
+        groupUIDAttribute: dn
+        groupNameAttributes: [ cn ]
+        usersQuery:
+          baseDN: {{ $userbdn | quote }}
+          scope: sub
+          derefAliases: never
+          pageSize: 0
+        userNameAttributes: [ sAMAccountName ]
+        userUIDAttribute: dn
+        groupMembershipAttributes: [ member ]
+{{- end }}
+----------------------------------------------------------------------------------------------
+
+
+
+values.yaml
+--------------------------------------------------------------------
+domains:
+  - domain: uswin
+    groupsBaseDN: "OU=Groups,DC=uswin,DC=ad,DC=vzwcorp,DC=com"
+    userBaseDN: "DC=uswin,DC=ad,DC=vzwcorp,DC=com"
+    url: ldap://uswinlb.verizon.com
+  - domain: emea
+    groupsBaseDN: "OU=Groups,DC=emea,DC=dsmain,DC=com"
+    userBaseDN: "DC=emea,DC=dsmain,DC=com"
+    url: ldap://emealb.verizon.com
+  - domain: adebp
+    groupsBaseDN: "OU=Groups,DC=adebp,DC=vzwcorp,DC=com"
+    userBaseDN: "DC=adebp,DC=vzwcorp,DC=com"
+    url: ldap://adebplb.verizon.com
+  - domain: vdsi
+    groupsBaseDN: "OU=Groups,DC=vdsi,DC=ent,DC=verizon,DC=com"
+    userBaseDN: "DC=vdsi,DC=ent,DC=verizon,DC=com"
+    url: ldap://vdsilb.verizon.com
+
+
+chart.yaml
+----------------------------------------------------------------------
+apiVersion: v2
+name: managed-groupsyncs
+description: A Helm chart for managed groupsyncs
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
+
+helm
+--------------------------------------------------------------------------
+C:\Users\kurelak\Documents\GitLab\onboarding_gitops_manifests_prod\groupsync> ./helm.exe template . --name-template tpapdocpntsj14v-groupsync --namespace group-sync-operator --kube-version 1.27 --set clusterName=tpapdocpntsj14v --values values.yaml --include-crds --debug
+install.go:214: [debug] Original chart version: ""
+install.go:231: [debug] CHART PATH: C:\Users\kurelak\Documents\GitLab\onboarding_gitops_manifests_prod\groupsync
+
+
+Error: template: managed-groupsyncs/templates/groupsync.yaml:19:11: executing "managed-groupsyncs/templates/groupsync.yaml" at <$.Files.Lines>: error calling Lines: runtime error: index out of range [-1]     
+helm.go:84: [debug] template: managed-groupsyncs/templates/groupsync.yaml:19:11: executing "managed-groupsyncs/templates/groupsync.yaml" at <$.Files.Lines>: error calling Lines: runtime error: index out of range [-1]
