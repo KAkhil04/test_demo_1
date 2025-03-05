@@ -201,3 +201,14 @@ spec:
         groupMembershipAttributes: [ member ]
 {{- end }}
 {{- end }}
+
+
+-------------------------------------------------------------------------------------------------------------------
+
+{{- $filePath := printf "groups/%s-%s.data" $clusterName $domain }}
+{{- $concatFilter := "" }}
+{{- with $.Files.Get $filePath }}
+  {{- range $.Files.Lines $filePath }}
+    {{- $concatFilter = printf "%s(cn=%s)" $concatFilter . }}
+  {{- end }}
+{{- end }}
