@@ -1,0 +1,313 @@
+[kurelak@tdcldj14va001 ~]$ oc get pv pvc-19e18e91-4d73-4430-b722-45ef6683dfd5 -o yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: csi.trident.netapp.io
+    volume.kubernetes.io/provisioner-deletion-secret-name: ""
+    volume.kubernetes.io/provisioner-deletion-secret-namespace: ""
+  creationTimestamp: "2025-02-24T15:45:15Z"
+  finalizers:
+  - kubernetes.io/pv-protection
+  - external-attacher/csi-trident-netapp-io
+  name: pvc-19e18e91-4d73-4430-b722-45ef6683dfd5
+  resourceVersion: "1466364866"
+  uid: e4d472c0-f1e5-4677-af1b-61d85ed1299a
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 20Gi
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: mftps-pvc
+    namespace: iipv-sit-elvis
+    resourceVersion: "1466362958"
+    uid: 19e18e91-4d73-4430-b722-45ef6683dfd5
+  csi:
+    driver: csi.trident.netapp.io
+    volumeAttributes:
+      backendUUID: 408543ac-a631-4d3b-a675-bdadaaf035ea
+      internalName: tpanfc11_ocp01_pvc_19e18e91_4d73_4430_b722_45ef6683dfd5
+      name: pvc-19e18e91-4d73-4430-b722-45ef6683dfd5
+      protocol: file
+      storage.kubernetes.io/csiProvisionerIdentity: 1738169925208-7114-csi.trident.netapp.io
+    volumeHandle: pvc-19e18e91-4d73-4430-b722-45ef6683dfd5
+  mountOptions:
+  - rw
+  - hard
+  - intr
+  - bg
+  - vers=4.1
+  - proto=tcp
+  - timeo=600
+  - rsize=65536
+  - wsize=65536
+  - sec=sys
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: premium
+  volumeMode: Filesystem
+status:
+  lastPhaseTransitionTime: "2025-02-24T15:45:15Z"
+  phase: Bound
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------[kurelak@tdcldj14va001 ~]$ oc get pvc | grep mft
+mftps-pvc         Bound    pvc-19e18e91-4d73-4430-b722-45ef6683dfd5   20Gi       RWX            premium        <unset>                 13d
+[kurelak@tdcldj14va001 ~]$ oc get pvc mftps-pvc -o yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"finalizers":["kubernetes.io/pvc-protection"],"name":"mftps-pvc","namespace":"iipv-sit-elvis"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"20Gi"}},"storageClassName":"premium","volumeMode":"Filesystem"},"status":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"20Gi"},"phase":"Bound"}}
+    pv.kubernetes.io/bind-completed: "yes"
+    pv.kubernetes.io/bound-by-controller: "yes"
+    volume.beta.kubernetes.io/storage-provisioner: csi.trident.netapp.io
+    volume.kubernetes.io/storage-provisioner: csi.trident.netapp.io
+  creationTimestamp: "2025-02-24T15:44:50Z"
+  finalizers:
+  - kubernetes.io/pvc-protection
+  name: mftps-pvc
+  namespace: iipv-sit-elvis
+  resourceVersion: "1466364093"
+  uid: 19e18e91-4d73-4430-b722-45ef6683dfd5
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: premium
+  volumeMode: Filesystem
+  volumeName: pvc-19e18e91-4d73-4430-b722-45ef6683dfd5
+status:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 20Gi
+  phase: Bound
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+[kurelak@tdcldj14va001 ~]$ oc get pods | grep mft
+mft-platform-server-78fb45647c-9dnd4           0/1     ContainerCreating   0               18m
+[kurelak@tdcldj14va001 ~]$ oc get pod mft-platform-server-78fb45647c-9dnd4 -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    checksum/secret: 1326148b6a78075e5482e87df64f5ca0a6bc53a7fa9d47761aa256cb348d83c8
+    elastic.co/namespace: vbg_np_iipv
+    k8s.ovn.org/pod-networks: '{"default":{"ip_addresses":["10.128.44.227/23"],"mac_address":"0a:58:0a:80:2c:e3","gateway_ips":["10.128.44.1"],"routes":[{"dest":"10.128.0.0/14","nextHop":"10.128.44.1"},{"dest":"172.30.0.0/16","nextHop":"10.128.44.1"},{"dest":"100.64.0.0/16","nextHop":"10.128.44.1"}],"ip_address":"10.128.44.227/23","gateway_ip":"10.128.44.1"}}'
+    openshift.io/scc: anyuid
+  creationTimestamp: "2025-03-10T14:29:15Z"
+  generateName: mft-platform-server-78fb45647c-
+  labels:
+    pod-template-hash: 78fb45647c
+    project.app: mft-platform-server
+    project.lob: vzw
+    project.name: mft-platform-server
+    project.svc_tag: psu8.1.2v2
+    project.vsad: iipv
+  name: mft-platform-server-78fb45647c-9dnd4
+  namespace: iipv-sit-elvis
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: mft-platform-server-78fb45647c
+    uid: 51a0bdec-9328-4104-9e06-29686fd91e16
+  resourceVersion: "1527252345"
+  uid: 8957e6b8-95df-484f-80b4-49999c7851ac
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - tpanpocpj14v-9jmtc-worker-2-mdd7f
+  containers:
+  - env:
+    - name: KUBERNETES_NAMESPACE
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.namespace
+    - name: CFROOT
+      value: /var/mftps
+    image: iipv-docker-np.oneartifactoryci.verizon.com/psu8.1.2nonroot
+    imagePullPolicy: IfNotPresent
+    name: mft-platform-server
+    ports:
+    - containerPort: 8080
+      name: http
+      protocol: TCP
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi
+      requests:
+        cpu: "1"
+        memory: 4Gi
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+        - MKNOD
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsGroup: 9999
+      runAsNonRoot: true
+      runAsUser: 9999
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/passwd
+      name: passwd-vol
+      subPath: passwd
+    - mountPath: /etc/shadow
+      name: shadow-vol
+      subPath: shadow
+    - mountPath: /opt/VIS2/elvis
+      name: elvis-batch-pvc
+    - mountPath: /var/mftps
+      name: mftps-pvc
+    - mountPath: /tmp
+      name: tmpfs
+    - mountPath: /opt/newrelic/newrelic.yml
+      name: mft-platform-server-newrelic
+      subPath: newrelic.yml
+    - mountPath: /scriptscheck/readiness.sh
+      name: mft-platform-server-readiness
+      subPath: readiness.sh
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-9zr26
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  imagePullSecrets:
+  - name: cicd-docker-np-regcred
+  nodeName: tpanpocpj14v-9jmtc-worker-2-mdd7f
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext:
+    seLinuxOptions:
+      level: s0:c32,c4
+  serviceAccount: svc-iipv-elvis
+  serviceAccountName: svc-iipv-elvis
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoSchedule
+    key: vsad
+    operator: Equal
+    value: IIPV
+  - effect: NoSchedule
+    key: role
+    operator: Equal
+    value: worker
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoSchedule
+    key: node.kubernetes.io/memory-pressure
+    operator: Exists
+  volumes:
+  - name: passwd-vol
+    persistentVolumeClaim:
+      claimName: passwd-pvc
+  - name: shadow-vol
+    persistentVolumeClaim:
+      claimName: passwd-pvc
+  - name: elvis-batch-pvc
+    persistentVolumeClaim:
+      claimName: elvis-batch-pvc
+  - name: mftps-pvc
+    persistentVolumeClaim:
+      claimName: mftps-pvc
+  - emptyDir: {}
+    name: tmpfs
+  - configMap:
+      defaultMode: 420
+      name: mft-platform-server-newrelic
+    name: mft-platform-server-newrelic
+  - configMap:
+      defaultMode: 420
+      name: mft-platform-server-readiness
+    name: mft-platform-server-readiness
+  - name: kube-api-access-9zr26
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+      - configMap:
+          items:
+          - key: service-ca.crt
+            path: service-ca.crt
+          name: openshift-service-ca.crt
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-10T14:29:15Z"
+    status: "False"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-10T14:29:15Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-10T14:29:15Z"
+    message: 'containers with unready status: [mft-platform-server]'
+    reason: ContainersNotReady
+    status: "False"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-10T14:29:15Z"
+    message: 'containers with unready status: [mft-platform-server]'
+    reason: ContainersNotReady
+    status: "False"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-10T14:29:15Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - image: iipv-docker-np.oneartifactoryci.verizon.com/psu8.1.2nonroot
+    imageID: ""
+    lastState: {}
+    name: mft-platform-server
+    ready: false
+    restartCount: 0
+    started: false
+    state:
+      waiting:
+        reason: ContainerCreating
+  hostIP: 63.25.151.56
+  hostIPs:
+  - ip: 63.25.151.56
+  phase: Pending
+  qosClass: Burstable
+  startTime: "2025-03-10T14:29:15Z"
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
