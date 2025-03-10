@@ -1,14 +1,13 @@
 Hello Jordon,
 
-Thanks for coming forward to assist us fixing this issue.
+Thank you for offering to help us resolve this issue.
 
-We have 15 NonProd and 23 Prod Clusters including the Hub. Out of these, we see GroupSync argo apps of 2 clusters in NonProd and 4 clusters in Prod are failing with the same error. All these clusters look for the same GroupSync template file and will try to generate the manifest updating the cluster and the domain names. If you observe the helm command, the only thing that changes from cluster to cluster is the cluster name. But for some reason, it works fine for some but not for others. We also tried to see if there are any nonprintable or special characters in the domain files that prevents the manifest generation but there are none. So we are clueless.
+We currently manage 15 NonProd and 23 Prod Clusters, including the Hub. We have noticed that the GroupSync Argo apps for 2 clusters in NonProd and 4 clusters in Prod are failing with the same error. These clusters use the same GroupSync template file to generate manifests by updating the cluster and domain names. The only variable that changes between clusters is the cluster name in the Helm command. Despite this, the process works for some clusters but fails for others. We have checked for non-printable or special characters in the domain files that might prevent manifest generation, but found none. We are currently at a loss as to the cause of this issue.
 
-When did this issue begin?
-It's been a couple of weeks since we first started noticing this issue
+When did this issue begin? We first noticed this issue a couple of weeks ago.
 
-Does it correspond to any particular changes in the clusters or the repo itself?
-As mentioned,  the contents of the repo is left untouched atleast an year. It worked fine all this time. Also, we don't think of any changes in cluster that could break this.
+Does it correspond to any particular changes in the clusters or the repo itself? The contents of the repo have remained unchanged for at least a year, and everything worked fine until recently. We are not aware of any cluster changes that could have caused this issue.
 
-Can you reproduce this error with the chart itself outside of ArgoCD?
-Tried cloning the repo and run the helm template command, even it's throwing the same error in local. Tried --debug too, it didn't show anything apart from the error.
+Can you reproduce this error with the chart itself outside of ArgoCD? We cloned the repo and ran the Helm template command locally, but it resulted in the same error. Using the --debug flag did not provide any additional insights beyond the error message.
+
+Best regards, 
