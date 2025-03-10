@@ -1,13 +1,66 @@
-Hello Jordon,
-
-Thank you for offering to help us resolve this issue.
-
-We currently manage 15 NonProd and 23 Prod Clusters, including the Hub. We have noticed that the GroupSync Argo apps for 2 clusters in NonProd and 4 clusters in Prod are failing with the same error. These clusters use the same GroupSync template file to generate manifests by updating the cluster and domain names. The only variable that changes between clusters is the cluster name in the Helm command. Despite this, the process works for some clusters but fails for others. We have checked for non-printable or special characters in the domain files that might prevent manifest generation, but found none. We are currently at a loss as to the cause of this issue.
-
-When did this issue begin? We first noticed this issue a couple of weeks ago.
-
-Does it correspond to any particular changes in the clusters or the repo itself? The contents of the repo have remained unchanged for at least a year, and everything worked fine until recently. We are not aware of any cluster changes that could have caused this issue.
-
-Can you reproduce this error with the chart itself outside of ArgoCD? We cloned the repo and ran the Helm template command locally, but it resulted in the same error. Using the --debug flag did not provide any additional insights beyond the error message.
-
-Best regards, 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cycode-operator
+  name: cycode-operator
+  namespace: k3pv-dev-cycode
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: cycode-operator
+      dedicated: secops
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: cycode-operator
+        dedicated: secops
+    spec:
+      containers:
+      - env:
+        - name: OPERATOR_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: OPERATOR_CONFIGMAP_NAME
+          value: overrides
+        - name: TF_LOG
+          value: ERROR
+        - name: environment
+          value: cycode
+        image: k3pv-cycode-docker-np.oneartifactoryci.verizon.com/cycode-artifacts/cycodehq/cycode-operator-octopus:main-c8cb7be2
+        imagePullPolicy: IfNotPresent
+        name: cycode-operator
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4Gi
+          requests:
+            cpu: "1"
+            memory: 4Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          capabilities:
+              drop: ["ALL"]
+          seccompProfile:
+              type: RuntimeDefault
+          readOnlyRootFilesystem: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+    dnsPolicy: ClusterFirst
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    serviceAccount: tpanp-k3pv-dev-cycode-ocp-sa
+    serviceAccountName: tpanp-k3pv-dev-cycode-ocp-sa
+    terminationGracePeriodSeconds: 30
