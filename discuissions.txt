@@ -1,0 +1,14 @@
+Hello Jordon,
+
+Thanks for coming forward to assist us fixing this issue.
+
+We have 15 NonProd and 23 Prod Clusters including the Hub. Out of these, we see GroupSync argo apps of 2 clusters in NonProd and 4 clusters in Prod are failing with the same error. All these clusters look for the same GroupSync template file and will try to generate the manifest updating the cluster and the domain names. If you observe the helm command, the only thing that changes from cluster to cluster is the cluster name. But for some reason, it works fine for some but not for others. We also tried to see if there are any nonprintable or special characters in the domain files that prevents the manifest generation but there are none. So we are clueless.
+
+When did this issue begin?
+It's been a couple of weeks since we first started noticing this issue
+
+Does it correspond to any particular changes in the clusters or the repo itself?
+As mentioned,  the contents of the repo is left untouched atleast an year. It worked fine all this time. Also, we don't think of any changes in cluster that could break this.
+
+Can you reproduce this error with the chart itself outside of ArgoCD?
+Tried cloning the repo and run the helm template command, even it's throwing the same error in local. Tried --debug too, it didn't show anything apart from the error.
