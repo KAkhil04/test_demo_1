@@ -1,2 +1,15 @@
-cloudsdk:x:1000:1000:Linux User,,,:/home/cloudsdk:/sbin/nologin
-1001000000:x:1001000000:0:1001000000 user:/:/sbin/nologin
+University(Cluster)
+├── Department(Tenant): School of Engineering
+│   ├── Course(Namespace): Computer Science
+│   │   ├── Class(App): Java Programming
+│   │   └── Class(App): Data Structures
+│   └── CourseNamespace): Mechanical Engineering
+│       ├── Class(App): Thermodynamics
+│       └── Class(App): Fluid Mechanics
+└── Department(Tenant): School of Arts
+    ├── Course(Namespace): Literature
+    │   ├── Class(App): English Literature
+    │   └── Class(App): World Literature
+    └── Course: History
+        ├── Class(App): Ancient History
+        └── Class(App): Modern History
