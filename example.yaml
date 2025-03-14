@@ -205,10 +205,24 @@ Format: Ensure the file has one cluster name per line.
 Run the Script: Ensure the environment-specific file is in the same directory as the script and run the script.
 -------------------
 
-apiVersion: argoproj.io/v1alpha1
+#!/bin/bash
+
+# Set the filename to 'nonprod.txt' or 'prod.txt'
+FILENAME="nonprod.txt"
+
+# Check if the file exists
+if [[ ! -f "$FILENAME" ]]; then
+  echo "File $FILENAME does not exist."
+  exit 1
+fi
+
+# Read the cluster names from the file
+while IFS= read -r clustername; do
+  # Create the YAML content
+  yaml_content="apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: tpalabocpj14v-app-of-apps-nonprod
+  name: ${clustername}-app-of-apps-nonprod
   namespace: appdev-gitops
 spec:
   project: appdev
@@ -219,7 +233,12 @@ spec:
   source:
     repoURL: https://gitlab.verizon.com/gts-openshift/onboarding_gitops_manifests_nonprod.git
     targetRevision: HEAD
-    path: Dedicated/tpalabocpj14v/argoApps
+    path: Dedicated/${clustername}/argoApps
   destination:
     server: https://kubernetes.default.svc
     namespace: appdev-gitops
+"
+
+  # Write the YAML content to a file
+  echo "$yaml_content" > "${clustername}_AppOfApps.yaml"
+done < "$FILENAME"
