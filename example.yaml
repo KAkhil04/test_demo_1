@@ -218,6 +218,9 @@ fi
 
 # Read the cluster names from the file
 while IFS= read -r clustername; do
+  # Remove any carriage return characters
+  clustername=$(echo "$clustername" | tr -d '\r')
+
   # Create the YAML content
   yaml_content="apiVersion: argoproj.io/v1alpha1
 kind: Application
