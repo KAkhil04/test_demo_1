@@ -17,7 +17,44 @@ University(Cluster)
 
 When will we review the dedicated cluster folder structure? We have been continuously onboarding namespaces into it, and it may become challenging to adjust them later.
 
-SECRET=`oc get secret -n appdev-gitops | grep  argo-appdev-admin-token | head -n 1 | awk '{print $1 }'`
-TOKEN=`echo $(oc get secret $SECRET -n appdev-gitops -o jsonpath='{.data.token}') | base64 --decode`
-echo $TOKEN > token.txt
-cat token.txt
+#!/bin/bash
+
+# Define GitLab project ID and access token
+GITLAB_PROJECT_ID=12345
+GITLAB_ACCESS_TOKEN="abcdef123456"
+
+# Read cluster names from clusters.txt
+while IFS= read -r clustername; do
+  # Log in to the OpenShift cluster
+  oc login https://api.${clustername}.xyz.com:6443 -u kurelak -p R@nch0@123
+
+  # Check if login was successful
+  if [ $? -eq 0 ]; then
+    echo "Logged in to cluster: ${clustername}"
+
+    # Get the secret and token
+    SECRET=$(oc get secret -n appdev-gitops | grep argo-appdev-admin-token | head -n 1 | awk '{print $1}')
+    TOKEN=$(oc get secret $SECRET -n appdev-gitops -o jsonpath='{.data.token}' | base64 --decode)
+
+    # Save the token to a file
+    echo $TOKEN > token.txt
+    cat token.txt
+
+    # Convert cluster name to uppercase
+    CLUSTER_NAME_UPPER=$(echo $clustername | tr '[:lower:]' '[:upper:]')
+
+    # Post the token to GitLab as a project variable
+    curl --request POST \
+      --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
+      --header "Content-Type: application/json" \
+      --data "{
+        \"key\": \"${CLUSTER_NAME_UPPER}_TOKEN\",
+        \"value\": \"${TOKEN}\"
+      }" \
+      "https://gitlab.example.com/api/v4/projects/${GITLAB_PROJECT_ID}/variables"
+
+    echo "Token for cluster ${clustername} posted to GitLab."
+  else
+    echo "Failed to log in to cluster: ${clustername}"
+  fi
+done < clusters.txt
