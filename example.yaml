@@ -43,20 +43,28 @@ while IFS= read -r clustername; do
     # Convert cluster name to uppercase
     CLUSTER_NAME_UPPER=$(echo $clustername | tr '[:lower:]' '[:upper:]')
 
-    # Post the token to GitLab as a project variable
-    curl --request POST \
-      --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
-      --header "Content-Type: application/json" \
-      --data "{
-        \"key\": \"${CLUSTER_NAME_UPPER}_TOKEN\",
-        \"value\": \"${TOKEN}\",
-        \"protected\": true,
-        \"masked\": true,
-        \"variable_type\": \"env_var\"
-      }" \
-      "https://gitlab.example.com/api/v4/projects/${GITLAB_PROJECT_ID}/variables"
+    # Check if the variable already exists in GitLab
+    EXISTING_VARIABLE=$(curl --silent --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
+      "https://gitlab.example.com/api/v4/projects/${GITLAB_PROJECT_ID}/variables/${CLUSTER_NAME_UPPER}_TOKEN")
 
-    echo "Token for cluster ${clustername} posted to GitLab."
+    if [ -z "$EXISTING_VARIABLE" ]; then
+      # Post the token to GitLab as a project variable
+      curl --request POST \
+        --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"key\": \"${CLUSTER_NAME_UPPER}_TOKEN\",
+          \"value\": \"${TOKEN}\",
+          \"protected\": true,
+          \"masked\": true,
+          \"variable_type\": \"env_var\"
+        }" \
+        "https://gitlab.example.com/api/v4/projects/${GITLAB_PROJECT_ID}/variables"
+
+      echo "Token for cluster ${clustername} posted to GitLab."
+    else
+      echo "Token for cluster ${clustername} already exists in GitLab."
+    fi
   else
     echo "Failed to log in to cluster: ${clustername}"
   fi
