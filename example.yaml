@@ -126,3 +126,74 @@ while IFS= read -r clustername; do
     echo "Failed to log in to cluster: ${clustername}"
   fi
 done < clusters.txt
+---------------
+
+#!/bin/bash
+
+# Define GitLab project ID and access token
+GITLAB_PROJECT_ID=12345
+GITLAB_ACCESS_TOKEN="abcdef123456"
+
+# Prompt the user to specify the environment
+read -p "Enter the environment (prod or nonprod): " ENVIRONMENT
+
+# Validate the environment input
+if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "nonprod" ]]; then
+  echo "Invalid environment. Please enter 'prod' or 'nonprod'."
+  exit 1
+fi
+
+# Read cluster names from clusters.txt
+while IFS= read -r clustername; do
+  # Determine the API URL based on the environment
+  if [ "$ENVIRONMENT" == "prod" ]; then
+    API_URL="https://api.${clustername}.xyz.com:6443"
+  else
+    API_URL="https://api.${clustername}.ebiz.xyz.com:6443"
+  fi
+
+  # Log in to the OpenShift cluster
+  oc login $API_URL -u kurelak -p R@nch0@123
+
+  # Check if login was successful
+  if [ $? -eq 0 ]; then
+    echo "Logged in to cluster: ${clustername}"
+
+    # Get the secret and token
+    SECRET=$(oc get secret -n appdev-gitops | grep argo-appdev-admin-token | head -n 1 | awk '{print $1}')
+    TOKEN=$(oc get secret $SECRET -n appdev-gitops -o jsonpath='{.data.token}' | base64 --decode)
+
+    # Save the token to a file
+    echo $TOKEN > token.txt
+    cat token.txt
+
+    # Convert cluster name to uppercase
+    CLUSTER_NAME_UPPER=$(echo $clustername | tr '[:lower:]' '[:upper:]')
+
+    # Check if the variable already exists in GitLab
+    HTTP_STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+      --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
+      "https://gitlab.example.com/api/v4/projects/${GITLAB_PROJECT_ID}/variables/${CLUSTER_NAME_UPPER}_TOKEN")
+
+    if [ "$HTTP_STATUS" -eq 404 ]; then
+      # Post the token to GitLab as a project variable
+      curl --request POST \
+        --header "PRIVATE-TOKEN: ${GITLAB_ACCESS_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"key\": \"${CLUSTER_NAME_UPPER}_TOKEN\",
+          \"value\": \"${TOKEN}\",
+          \"protected\": true,
+          \"masked\": true,
+          \"variable_type\": \"env_var\"
+        }" \
+        "https://gitlab.example.com/api/v4/projects/${GITLAB_PROJECT_ID}/variables"
+
+      echo "Token for cluster ${clustername} posted to GitLab."
+    else
+      echo "Token for cluster ${clustername} already exists in GitLab."
+    fi
+  else
+    echo "Failed to log in to cluster: ${clustername}"
+  fi
+done < clusters.txt
