@@ -1,0 +1,115 @@
+Skipping argoApps
+Processing b6vv
+Checking subdirectory cxpdomainvbg
+Found yaml file: Dedicated/b6vv/cxpdomainvbg/b6vv-dev-cxpdomainvbg.yaml
+Cluster name: tpanpocpcp4j14v
+Moved b6vv to Dedicated/tpanpocpcp4j14v
+Processing c2av
+Checking subdirectory bgw
+Found yaml file: Dedicated/c2av/bgw/c2av-dev-bgw.yaml
+Cluster name: tdcnpocpntsj14v
+Moved c2av to Dedicated/tdcnpocpntsj14v
+Processing cdb1
+Checking subdirectory awesomeapp
+Found yaml file: Dedicated/cdb1/awesomeapp/cdb1-dev-awesomeapp.yaml
+Cluster name: tpalabocpj14v
+Moved cdb1 to Dedicated/tpalabocpj14v
+Processing ev6v
+Checking subdirectory cxpaggrvbg
+Found yaml file: Dedicated/ev6v/cxpaggrvbg/ev6v-dev-cxpaggrvbg.yaml
+Cluster name: tpanpocpcp4j14v
+Moved ev6v to Dedicated/tpanpocpcp4j14v
+Processing I1AV
+Checking subdirectory onecloud
+Found yaml file: Dedicated/I1AV/onecloud/I1AV-dev-onecloud.yaml
+No cluster name found in Dedicated/I1AV/onecloud/I1AV-dev-onecloud.yaml
+Checking subdirectory test
+Found yaml file: Dedicated/I1AV/test/I1AV-uat-test.yaml
+Cluster name: tpanpocpcp4j14v
+Moved I1AV to Dedicated/tpanpocpcp4j14v
+Processing i9nv
+Checking subdirectory dctrack
+Found yaml file: Dedicated/i9nv/dctrack/i9nv-dev-dctrack.yaml
+Cluster name: tpanpocpntsj14v
+Moved i9nv to Dedicated/tpanpocpntsj14v
+Processing ienv
+Checking subdirectory jarvis
+Found yaml file: Dedicated/ienv/jarvis/ienv-dev-jarvis.yaml
+Cluster name: tdcnpocpaidj14v
+Moved ienv to Dedicated/tdcnpocpaidj14v
+Processing ipyv
+Checking subdirectory ipmgr
+Found yaml file: Dedicated/ipyv/ipmgr/ipyv-dev-ipmgr.yaml
+Cluster name: tdcnpocpednj14v
+Moved ipyv to Dedicated/tdcnpocpednj14v
+Processing ivav
+Checking subdirectory ivapp
+Found yaml file: Dedicated/ivav/ivapp/ivav-dev-ivapp.yaml
+Cluster name: tdcnpocpntsj14v
+Moved ivav to Dedicated/tdcnpocpntsj14v
+Processing j14v
+Checking subdirectory 416upgrade
+Found yaml file: Dedicated/j14v/416upgrade/j14v-dev-416upgrade.yaml
+Cluster name: tdcnpocpednj14v
+Moved j14v to Dedicated/tdcnpocpednj14v
+Processing jdhv
+Checking subdirectory ciso
+Found yaml file: Dedicated/jdhv/ciso/jdhv-dev-ciso.yaml
+Cluster name: tdcnpocpaidj14v
+Moved jdhv to Dedicated/tdcnpocpaidj14v
+Processing jlnv
+Checking subdirectory jarvis
+Found yaml file: Dedicated/jlnv/jarvis/jlnv-dev-jarvis.yaml
+Cluster name: tdcnpocpaidj14v
+Moved jlnv to Dedicated/tdcnpocpaidj14v
+Processing jluv
+Checking subdirectory gsam
+Found yaml file: Dedicated/jluv/gsam/jluv-dev-gsam.yaml
+Cluster name: tdcnpocpgsaj14v
+Moved jluv to Dedicated/tdcnpocpgsaj14v
+Processing jpuv
+Checking subdirectory autobi
+Found yaml file: Dedicated/jpuv/autobi/jpuv-dev-autobi.yaml
+Cluster name: tdcnpocpgsaj14v
+Moved jpuv to Dedicated/tdcnpocpgsaj14v
+Processing JX8V
+Checking subdirectory onecloud
+Found yaml file: Dedicated/JX8V/onecloud/JX8V-dev-onecloud.yaml
+No cluster name found in Dedicated/JX8V/onecloud/JX8V-dev-onecloud.yaml
+Checking subdirectory test
+Found yaml file: Dedicated/JX8V/test/JX8V-preprod-test.yaml
+Cluster name: tpapdocpaidj14v
+Moved JX8V to Dedicated/tpapdocpaidj14v
+Processing koev
+Checking subdirectory icon
+Found yaml file: Dedicated/koev/icon/koev-sit-icon.yaml
+Cluster name: tdcnpocpednj14v
+Moved koev to Dedicated/tdcnpocpednj14v
+Processing nt4v
+Checking subdirectory ntls
+Found yaml file: Dedicated/nt4v/ntls/nt4v-dev-ntls.yaml
+Cluster name: tdcnpocpntsj14v
+Moved nt4v to Dedicated/tdcnpocpntsj14v
+Processing ocp
+Checking subdirectory test4
+Found yaml file: Dedicated/ocp/test4/ocp-dev-test4.yaml
+Cluster name: tdcnpocpaidj14v
+Moved ocp to Dedicated/tdcnpocpaidj14v
+Processing tcev
+Checking subdirectory tcoe
+Found yaml file: Dedicated/tcev/tcoe/tcev-dev-tcoe.yaml
+Cluster name: tpanpocpntsj14v
+Moved tcev to Dedicated/tpanpocpntsj14v
+Processing tpalabocpj14v
+Checking subdirectory argoApps
+Found yaml file: Dedicated/tpalabocpj14v/argoApps/kurelak-folder-test-nonprod-Dedicated.yaml
+No cluster name found in Dedicated/tpalabocpj14v/argoApps/kurelak-folder-test-nonprod-Dedicated.yaml
+Checking subdirectory cdb1
+No yaml file found in cdb1
+Checking subdirectory kurelak
+No yaml file found in kurelak
+Processing vz2v
+Checking subdirectory vzsearch
+Found yaml file: Dedicated/vz2v/vzsearch/vz2v-dev-vzsearch.yaml
+Cluster name: tpanpocpcp4j14v
+Moved vz2v to Dedicated/tpanpocpcp4j14v
