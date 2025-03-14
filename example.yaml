@@ -13,3 +13,6 @@ University(Cluster)
     └── Course: History
         ├── Class(App): Ancient History
         └── Class(App): Modern History
+
+
+When are we going to look at the dedicated cluster folder structure? We kept onboarding the namespaces into it. Later it will become difficult for us to adjust them.
