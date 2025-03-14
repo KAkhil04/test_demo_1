@@ -197,3 +197,9 @@ while IFS= read -r clustername; do
     echo "Failed to log in to cluster: ${clustername}"
   fi
 done < clusters.txt
+
+--------------
+
+Create Environment-Specific File: Create a file named prod.txt or nonprod.txt with the cluster names.
+Format: Ensure the file has one cluster name per line.
+Run the Script: Ensure the environment-specific file is in the same directory as the script and run the script.
