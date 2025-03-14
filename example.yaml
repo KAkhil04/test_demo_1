@@ -16,3 +16,8 @@ University(Cluster)
 
 
 When will we review the dedicated cluster folder structure? We have been continuously onboarding namespaces into it, and it may become challenging to adjust them later.
+
+SECRET=`oc get secret -n appdev-gitops | grep  argo-appdev-admin-token | head -n 1 | awk '{print $1 }'`
+TOKEN=`echo $(oc get secret $SECRET -n appdev-gitops -o jsonpath='{.data.token}') | base64 --decode`
+echo $TOKEN > token.txt
+cat token.txt
