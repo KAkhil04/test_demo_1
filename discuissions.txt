@@ -1,66 +1,86 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: cycode-operator
-  name: cycode-operator
-  namespace: k3pv-dev-cycode
-spec:
-  progressDeadlineSeconds: 600
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      app: cycode-operator
-      dedicated: secops
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      creationTimestamp: null
-      labels:
-        app: cycode-operator
-        dedicated: secops
-    spec:
-      containers:
-      - env:
-        - name: OPERATOR_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        - name: OPERATOR_CONFIGMAP_NAME
-          value: overrides
-        - name: TF_LOG
-          value: ERROR
-        - name: environment
-          value: cycode
-        image: k3pv-cycode-docker-np.oneartifactoryci.verizon.com/cycode-artifacts/cycodehq/cycode-operator-octopus:main-c8cb7be2
-        imagePullPolicy: IfNotPresent
-        name: cycode-operator
-        resources:
-          limits:
-            cpu: "2"
-            memory: 4Gi
-          requests:
-            cpu: "1"
-            memory: 4Gi
-        securityContext:
-          allowPrivilegeEscalation: false
-          runAsNonRoot: true
-          capabilities:
-              drop: ["ALL"]
-          seccompProfile:
-              type: RuntimeDefault
-          readOnlyRootFilesystem: true
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-    dnsPolicy: ClusterFirst
-    restartPolicy: Always
-    schedulerName: default-scheduler
-    serviceAccount: tpanp-k3pv-dev-cycode-ocp-sa
-    serviceAccountName: tpanp-k3pv-dev-cycode-ocp-sa
-    terminationGracePeriodSeconds: 30
+Skipping argoApps
+Processing c2av
+Checking subdirectory bgw
+Found yaml file: Dedicated/c2av/bgw/c2av-prod-bgw.yaml
+Cluster name: tpapdocpntsj14v
+Moved c2av to Dedicated/tpapdocpntsj14v
+Processing daryl
+Checking subdirectory ocptest
+Found yaml file: Dedicated/daryl/ocptest/daryl-prod-ocptest.yaml
+Cluster name: sacpdocpspaj14v
+Moved daryl to Dedicated/sacpdocpspaj14v
+Processing delb
+Checking subdirectory delphi
+Found yaml file: Dedicated/delb/delphi/delb-prod-delphi.yaml
+Cluster name: tdcpdocpspa02j14v
+Moved delb to Dedicated/tdcpdocpspa02j14v
+Processing ghlv
+Checking subdirectory db-clusters
+Found yaml file: Dedicated/ghlv/db-clusters/ghlv-prod-db-clusters.yaml
+Cluster name: sacpdocpspa03j14v
+Moved ghlv to Dedicated/sacpdocpspa03j14v
+Processing gulv
+Checking subdirectory aggregator
+Found yaml file: Dedicated/gulv/aggregator/gulv-prod-aggregator.yaml
+Cluster name: sacpdocpspa02j14v
+Moved gulv to Dedicated/sacpdocpspa02j14v
+Processing h4sv
+Checking subdirectory kafka
+Found yaml file: Dedicated/h4sv/kafka/h4sv-prod-kafka.yaml
+Cluster name: sacpdocpspa02j14v
+Moved h4sv to Dedicated/sacpdocpspa02j14v
+Processing i18v
+Checking subdirectory apollo
+Found yaml file: Dedicated/i18v/apollo/i18v-prod-apollo.yaml
+Cluster name: sacpdocpspa02j14v
+Moved i18v to Dedicated/sacpdocpspa02j14v
+Processing ienv
+Checking subdirectory jarvis
+Found yaml file: Dedicated/ienv/jarvis/ienv-prod-jarvis.yaml
+Cluster name: tdcpdocpaid03j14v
+Moved ienv to Dedicated/tdcpdocpaid03j14v
+Processing ipyv
+Checking subdirectory ipmgr
+Found yaml file: Dedicated/ipyv/ipmgr/ipyv-prod-ipmgr.yaml
+Cluster name: tdcpdocpednj14v
+Moved ipyv to Dedicated/tdcpdocpednj14v
+Processing iu4v
+Checking subdirectory uap
+Found yaml file: Dedicated/iu4v/uap/iu4v-prod-uap.yaml
+Cluster name: sacpdocpceqj14v
+Moved iu4v to Dedicated/sacpdocpceqj14v
+Processing jlnv
+Checking subdirectory jarvis
+Found yaml file: Dedicated/jlnv/jarvis/jlnv-prod-jarvis.yaml
+Cluster name: tdcpdocpaid02j14v
+Moved jlnv to Dedicated/tdcpdocpaid02j14v
+Processing koev
+Checking subdirectory icon
+Found yaml file: Dedicated/koev/icon/koev-prod-icon.yaml
+Cluster name: tpapdocpednj14v
+Moved koev to Dedicated/tpapdocpednj14v
+Processing nt4v
+Checking subdirectory ntls
+Found yaml file: Dedicated/nt4v/ntls/nt4v-prod-ntls.yaml
+Cluster name: tpapdocpntsj14v
+Moved nt4v to Dedicated/tpapdocpntsj14v
+Processing t6lv
+Checking subdirectory aggregator
+Found yaml file: Dedicated/t6lv/aggregator/t6lv-prod-aggregator.yaml
+Cluster name: sacpdocpspa02j14v
+Moved t6lv to Dedicated/sacpdocpspa02j14v
+Processing tcev
+Checking subdirectory tcoe
+Found yaml file: Dedicated/tcev/tcoe/tcev-prod-tcoe.yaml
+Cluster name: tdcpdocpspaj14v
+Moved tcev to Dedicated/tdcpdocpspaj14v
+Processing test
+Checking subdirectory run
+Found yaml file: Dedicated/test/run/test-prod-run.yaml
+Cluster name: tdcpdocpntsj14v
+Moved test to Dedicated/tdcpdocpntsj14v
+Processing vz2v
+Checking subdirectory vzsearch
+Found yaml file: Dedicated/vz2v/vzsearch/vz2v-prod-vzsearch.yaml
+Cluster name: tdcpdocpcp4j14v
+Moved vz2v to Dedicated/tdcpdocpcp4j14v
