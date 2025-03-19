@@ -81,3 +81,30 @@ spec:
 
 Invalid YAML - YAMLException: missed comma between flow collection entries at line 8, column 5:
 {{- include "publisher.labels" . | ...
+
+
+
+
+
+Akhil Kurella
+  3:26 PM
+What was the reason you said? for not going with the /app/tmp mounting?
+
+
+Govind Bajaj
+  3:26 PM
+Why should we do it, when /app is workdir ?
+
+
+
+
+NEW
+
+3:26
+What if we need 10 more directories, should we make emptydir for all of them? (edited) 
+3:27
+if /app is workdir with proper permissions, even then it's complaining about readonly fs.
+3:27
+We can. But that's not the right solution for it.
+3:27
+We have similar issues in 5 other apps.
