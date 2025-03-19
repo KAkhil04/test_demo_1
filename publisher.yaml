@@ -5,23 +5,23 @@ metadata:
   labels:
     app: publisher-app
     environment: {{ .Values.publisher.env }}
-  {{- include "publisher.labels" . | nindent 4 }}
+    {{- include "publisher.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
       app: publisher-app
-    {{- include "publisher.selectorLabels" . | nindent 6 }}
+      {{- include "publisher.selectorLabels" . | nindent 6 }}
   strategy:
     rollingUpdate:
       maxUnavailable: 20%
       maxSurge: 20%
-  revisionHistoryLimit: 5 # Retain some history for debugging
+  revisionHistoryLimit: 5
   template:
     metadata:
       labels:
         app: publisher-app
         environment: {{ .Values.publisher.env }}
-      {{- include "publisher.selectorLabels" . | nindent 8 }}
+        {{- include "publisher.selectorLabels" . | nindent 8 }}
     spec:
       imagePullSecrets:
         - name: {{ .Values.publisher.app.image.imagePullSecrets }}
@@ -56,7 +56,7 @@ spec:
           name: persistent-storage
         - mountPath: /tmp
           name: tmp
-        - mountPath: /app/tmp # Add writable volume for /app/tmp
+        - mountPath: /app/tmp
           name: app-tmp
         readinessProbe:
           tcpSocket:
@@ -72,7 +72,7 @@ spec:
       - name: persistent-storage
         persistentVolumeClaim:
           claimName: publisher-app
-      - name: app-tmp # Writable volume for /app/tmp
+      - name: app-tmp
         emptyDir: {}
       - name: tmp
         emptyDir: {}
