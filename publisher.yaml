@@ -1,0 +1,77 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: publisher-app
+  labels:
+    app: publisher-app
+    environment: {{ .Values.publisher.env }}
+  {{- include "publisher.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: publisher-app
+    {{- include "publisher.selectorLabels" . | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 20%
+      maxSurge: 20%
+  revisionHistoryLimit: 0
+  template:
+    metadata:
+      labels:
+        app: publisher-app
+        environment: {{ .Values.publisher.env }}
+      {{- include "publisher.selectorLabels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.publisher.app.image.imagePullSecrets }}
+      containers:
+      - args:
+        - bin/rails
+        - app:web:start
+        env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ .Values.publisher.kubernetesClusterDomain }}
+        envFrom:
+        - secretRef:
+            name: publisher-app
+        - configMapRef:
+            name: publisher-app
+        image: {{ .Values.publisher.app.image.repository }}:{{ .Values.publisher.app.image.tag }}
+        imagePullPolicy: Always
+        name: publisher-app
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+        resources: {{- toYaml .Values.publisher.app.resources | nindent 10 }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL            
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /persistent-storage
+          name: persistent-storage
+        - mountPath: /tmp
+          name: tmp
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: publisher-app
+      - name: app-tmp
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
