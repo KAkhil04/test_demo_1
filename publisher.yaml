@@ -97,14 +97,6 @@ Why should we do it, when /app is workdir ?
 
 
 
-
-NEW
-
-3:26
-What if we need 10 more directories, should we make emptydir for all of them? (edited) 
-3:27
-if /app is workdir with proper permissions, even then it's complaining about readonly fs.
-3:27
-We can. But that's not the right solution for it.
-3:27
-We have similar issues in 5 other apps.
+/app exists and is owned by USER 1000 because of the WORKDIR and chown commands in the Dockerfile.
+However, because readOnlyRootFilesystem: true is set, the entire filesystem (including /app) is mounted as read-only.
+When the application tries to write to /app/tmp, it fails with the error
