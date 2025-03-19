@@ -3,11 +3,16 @@
 # Input file containing namespace names
 input_file="namespaces.txt"
 
+# Define color codes
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 # Loop through each namespace in the file
 while IFS= read -r namespace; do
   if oc get namespace "$namespace" &>/dev/null; then
-    echo "Namespace '$namespace' exists in the cluster."
+    echo -e "${GREEN}Namespace '$namespace' exists in the cluster.${NC}"
   else
-    echo "Namespace '$namespace' does NOT exist in the cluster."
+    echo -e "${RED}Namespace '$namespace' does NOT exist in the cluster.${NC}"
   fi
 done < "$input_file"
