@@ -1,0 +1,34 @@
+> k logs -f pod/publisher-app-667559bd6-ccz8x
+bin/rails server
+=> Booting Puma
+=> Rails 6.1.7 application starting in dev
+=> Run `bin/rails server --help` for more startup options
+Exiting
+/usr/local/lib/ruby/3.2.0/fileutils.rb:406:in `mkdir': Read-only file system @ dir_s_mkdir - /app/tmp (Errno::EROFS)
+	from /usr/local/lib/ruby/3.2.0/fileutils.rb:406:in `fu_mkdir'
+	from /usr/local/lib/ruby/3.2.0/fileutils.rb:384:in `block (2 levels) in mkdir_p'
+	from /usr/local/lib/ruby/3.2.0/fileutils.rb:382:in `reverse_each'
+	from /usr/local/lib/ruby/3.2.0/fileutils.rb:382:in `block in mkdir_p'
+	from /usr/local/lib/ruby/3.2.0/fileutils.rb:374:in `each'
+	from /usr/local/lib/ruby/3.2.0/fileutils.rb:374:in `mkdir_p'
+	from /usr/local/bundle/gems/railties-6.1.7/lib/rails/commands/server/server_command.rb:72:in `block in create_tmp_directories'
+	from /usr/local/bundle/gems/railties-6.1.7/lib/rails/commands/server/server_command.rb:71:in `each'
+	from /usr/local/bundle/gems/railties-6.1.7/lib/rails/commands/server/server_command.rb:71:in `create_tmp_directories'
+	from /usr/local/bundle/gems/railties-6.1.7/lib/rails/commands/server/server_command.rb:35:in `start'
+	from /usr/local/bundle/gems/railties-6.1.7/lib/rails/commands/server/server_command.rb:144:in `block in perform'
+	from <internal:kernel>:90:in `tap'
+	from /usr/local/bundle/gems/railties-6.1.7/lib/rails/commands/server/server_command.rb:135:in `perform'
+	from /usr/local/bundle/gems/thor-1.3.1/lib/thor/command.rb:28:in `run'
+	from /usr/local/bundle/gems/thor-1.3.1/lib/thor/invocation.rb:127:in `invoke_command'
+	from /usr/local/bundle/gems/thor-1.3.1/lib/thor.rb:527:in `dispatch'
+	from /usr/local/bundle/gems/railties-6.1.7/lib/rails/command/base.rb:69:in `perform'
+	from /usr/local/bundle/gems/railties-6.1.7/lib/rails/command.rb:48:in `invoke'
+	from /usr/local/bundle/gems/railties-6.1.7/lib/rails/commands.rb:18:in `<top (required)>'
+	from <internal:/usr/local/lib/ruby/3.2.0/rubygems/core_ext/kernel_require.rb>:38:in `require'
+	from <internal:/usr/local/lib/ruby/3.2.0/rubygems/core_ext/kernel_require.rb>:38:in `require'
+	from bin/rails:9:in `<main>'
+rails aborted!
+Command failed with status (1): [bin/rails server]
+/app/lib/tasks/container_commands.rake:11:in `block (3 levels) in <top (required)>'
+Tasks: TOP => app:web:start
+(See full trace by running task with --trace)
