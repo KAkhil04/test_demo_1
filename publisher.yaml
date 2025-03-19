@@ -76,3 +76,8 @@ spec:
         emptyDir: {}
       - name: tmp
         emptyDir: {}
+
+
+
+Invalid YAML - YAMLException: missed comma between flow collection entries at line 8, column 5:
+{{- include "publisher.labels" . | ...
