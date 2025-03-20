@@ -19,6 +19,35 @@ fi
 USERNAME="kurelak"
 PASSWORD="R@nch0@123"
 
+# List of namespaces to ignore
+IGNORED_NAMESPACES=(
+  "appdev-gitops"
+  "bitnami-sealed-secrets"
+  "cert-manager"
+  "cert-manager-operator"
+  "community-operators"
+  "costmanagement-metrics-operator"
+  "default"
+  "global-load-balancer-operator"
+  "grafana"
+  "group-sync-operator"
+  "istio-system"
+  "kube-descheduler-operator"
+  "kube-node-lease"
+  "kube-public"
+  "kube-system"
+  "lb-operator"
+  "node-observability-operator"
+  "open-cluster-management-addon-observability"
+  "open-cluster-management-agent"
+  "open-cluster-management-agent-addon"
+  "openshift"
+  "proactive-node-scaling-operator"
+  "sacnpocpj14v"
+  "sysdig"
+  "trident"
+)
+
 # Loop through each cluster name in the input file
 while IFS= read -r CLUSTER_NAME; do
   if [[ -z "$CLUSTER_NAME" ]]; then
@@ -46,6 +75,11 @@ while IFS= read -r CLUSTER_NAME; do
 
   # Loop through each namespace and check specific labels and annotation
   for NAMESPACE in $NAMESPACES; do
+    # Skip ignored namespaces
+    if [[ " ${IGNORED_NAMESPACES[@]} " =~ " $NAMESPACE " ]]; then
+      continue
+    fi
+
     echo "  Namespace: $NAMESPACE" >> "$OUTPUT_FILE"
 
     # Get specific labels
@@ -79,32 +113,3 @@ while IFS= read -r CLUSTER_NAME; do
 done < "$INPUT_FILE"
 
 echo "Processing complete. Output written to $OUTPUT_FILE."
-
-
-
-
-appdev-gitops
-bitnami-sealed-secrets
-cert-manager
-cert-manager-operator
-community-operators
-costmanagement-metrics-operator
-default
-global-load-balancer-operator
-grafana
-group-sync-operator
-istio-system
-kube-descheduler-operator
-kube-node-lease
-kube-public
-kube-system
-lb-operator
-node-observability-operator
-open-cluster-management-addon-observability
-open-cluster-management-agent
-open-cluster-management-agent-addon
-openshift
-proactive-node-scaling-operator
-sacnpocpj14v
-sysdig
-trident
