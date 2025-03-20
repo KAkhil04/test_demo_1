@@ -1,102 +1,81 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: publisher-app
-  labels:
-    app: publisher-app
-    environment: {{ .Values.publisher.env }}
-    {{- include "publisher.labels" . | nindent 4 }}
-spec:
-  selector:
-    matchLabels:
-      app: publisher-app
-      {{- include "publisher.selectorLabels" . | nindent 6 }}
-  strategy:
-    rollingUpdate:
-      maxUnavailable: 20%
-      maxSurge: 20%
-  revisionHistoryLimit: 5
-  template:
-    metadata:
-      labels:
-        app: publisher-app
-        environment: {{ .Values.publisher.env }}
-        {{- include "publisher.selectorLabels" . | nindent 8 }}
-    spec:
-      imagePullSecrets:
-        - name: {{ .Values.publisher.app.image.imagePullSecrets }}
-      containers:
-      - args:
-        - bin/rails
-        - app:web:start
-        env:
-        - name: KUBERNETES_CLUSTER_DOMAIN
-          value: {{ .Values.publisher.kubernetesClusterDomain }}
-        envFrom:
-        - secretRef:
-            name: publisher-app
-        - configMapRef:
-            name: publisher-app
-        image: {{ .Values.publisher.app.image.repository }}:{{ .Values.publisher.app.image.tag }}
-        imagePullPolicy: Always
-        name: publisher-app
-        ports:
-        - containerPort: {{ .Values.service.targetPort }}
-        resources: {{- toYaml .Values.publisher.app.resources | nindent 10 }}
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL            
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-          runAsUser: 1000
-        volumeMounts:
-        - mountPath: /persistent-storage
-          name: persistent-storage
-        - mountPath: /tmp
-          name: tmp
-        - mountPath: /app/tmp
-          name: app-tmp
-        readinessProbe:
-          tcpSocket:
-            port: {{ .Values.service.targetPort }}
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          tcpSocket:
-            port: {{ .Values.service.targetPort }}
-          initialDelaySeconds: 15
-          periodSeconds: 20
-      volumes:
-      - name: persistent-storage
-        persistentVolumeClaim:
-          claimName: publisher-app
-      - name: app-tmp
-        emptyDir: {}
-      - name: tmp
-        emptyDir: {}
+#!/bin/bash
 
+# filepath: /path/to/script.sh
 
+# Input and output file paths
+INPUT_FILE="input.txt"
+OUTPUT_FILE="output.txt"
 
-Invalid YAML - YAMLException: missed comma between flow collection entries at line 8, column 5:
-{{- include "publisher.labels" . | ...
+# Clear the output file if it exists
+> "$OUTPUT_FILE"
 
+# Check if input file exists
+if [[ ! -f "$INPUT_FILE" ]]; then
+  echo "Input file $INPUT_FILE not found!"
+  exit 1
+fi
 
+# OpenShift login credentials
+USERNAME="kurelak"
+PASSWORD="R@nch0@123"
 
+# Loop through each cluster name in the input file
+while IFS= read -r CLUSTER_NAME; do
+  if [[ -z "$CLUSTER_NAME" ]]; then
+    continue
+  fi
 
+  echo "Processing cluster: $CLUSTER_NAME"
 
-Akhil Kurella
-  3:26 PM
-What was the reason you said? for not going with the /app/tmp mounting?
+  # Log into the cluster
+  oc login "https://api.${CLUSTER_NAME}.ebiz.verizon.com" -u "$USERNAME" -p "$PASSWORD" --insecure-skip-tls-verify 2>/dev/null
+  if [[ $? -ne 0 ]]; then
+    echo "Failed to log into cluster: $CLUSTER_NAME" >> "$OUTPUT_FILE"
+    continue
+  fi
 
+  # Get all namespaces
+  NAMESPACES=$(oc get namespaces -o jsonpath='{.items[*].metadata.name}')
+  if [[ $? -ne 0 ]]; then
+    echo "Failed to fetch namespaces for cluster: $CLUSTER_NAME" >> "$OUTPUT_FILE"
+    continue
+  fi
 
-Govind Bajaj
-  3:26 PM
-Why should we do it, when /app is workdir ?
+  # Write cluster name to the output file
+  echo "Cluster: $CLUSTER_NAME" >> "$OUTPUT_FILE"
 
+  # Loop through each namespace and check specific labels and annotation
+  for NAMESPACE in $NAMESPACES; do
+    echo "  Namespace: $NAMESPACE" >> "$OUTPUT_FILE"
 
+    # Get specific labels
+    LOB_LABEL=$(oc get namespace "$NAMESPACE" -o jsonpath='{.metadata.labels.onboarding\.xyz\.io/lob}' 2>/dev/null)
+    VAST_LABEL=$(oc get namespace "$NAMESPACE" -o jsonpath='{.metadata.labels.onboarding\.xyz\.io/vast}' 2>/dev/null)
 
-/app exists and is owned by USER 1000 because of the WORKDIR and chown commands in the Dockerfile.
-However, because readOnlyRootFilesystem: true is set, the entire filesystem (including /app) is mounted as read-only.
-When the application tries to write to /app/tmp, it fails with the error
+    # Get specific annotation
+    SUPPORT_POC_ANNOTATION=$(oc get namespace "$NAMESPACE" -o jsonpath='{.metadata.annotations.xyz\.com/support-poc}' 2>/dev/null)
+
+    # Check and write labels and annotation to the output file
+    if [[ -z "$LOB_LABEL" ]]; then
+      echo "    Label - onboarding.xyz.io/lob: Not Found" >> "$OUTPUT_FILE"
+    else
+      echo "    Label - onboarding.xyz.io/lob: $LOB_LABEL" >> "$OUTPUT_FILE"
+    fi
+
+    if [[ -z "$VAST_LABEL" ]]; then
+      echo "    Label - onboarding.xyz.io/vast: Not Found" >> "$OUTPUT_FILE"
+    else
+      echo "    Label - onboarding.xyz.io/vast: $VAST_LABEL" >> "$OUTPUT_FILE"
+    fi
+
+    if [[ -z "$SUPPORT_POC_ANNOTATION" ]]; then
+      echo "    Annotation - xyz.com/support-poc: Not Found" >> "$OUTPUT_FILE"
+    else
+      echo "    Annotation - xyz.com/support-poc: $SUPPORT_POC_ANNOTATION" >> "$OUTPUT_FILE"
+    fi
+  done
+
+  echo "" >> "$OUTPUT_FILE" # Add a blank line for readability
+done < "$INPUT_FILE"
+
+echo "Processing complete. Output written to $OUTPUT_FILE."
