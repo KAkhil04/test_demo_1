@@ -4,10 +4,10 @@
 
 # Input and output file paths
 INPUT_FILE="input.txt"
-OUTPUT_FILE="output.txt"
+OUTPUT_FILE="output.csv"
 
-# Clear the output file if it exists
-> "$OUTPUT_FILE"
+# Clear the output file if it exists and write the CSV header
+echo "Datacenter,Env,Cluster,Namespace,LOB,VAST,Support POC" > "$OUTPUT_FILE"
 
 # Check if input file exists
 if [[ ! -f "$INPUT_FILE" ]]; then
@@ -19,7 +19,7 @@ fi
 USERNAME="kurelak"
 PASSWORD="R@nch0@123"
 
-# List of namespaces to ignore
+# List of explicitly ignored namespaces
 IGNORED_NAMESPACES=(
   "appdev-gitops"
   "bitnami-sealed-secrets"
@@ -48,6 +48,20 @@ IGNORED_NAMESPACES=(
   "trident"
 )
 
+# Function to determine the datacenter based on the cluster name
+get_datacenter() {
+  local cluster_name=$1
+  if [[ "$cluster_name" == tpa* ]]; then
+    echo "Tampa"
+  elif [[ "$cluster_name" == tdc* ]]; then
+    echo "Twinsburg"
+  elif [[ "$cluster_name" == sac* ]]; then
+    echo "Sacramento"
+  else
+    echo "Unknown"
+  fi
+}
+
 # Loop through each cluster name in the input file
 while IFS= read -r CLUSTER_NAME; do
   if [[ -z "$CLUSTER_NAME" ]]; then
@@ -59,28 +73,36 @@ while IFS= read -r CLUSTER_NAME; do
   # Log into the cluster
   oc login "https://api.${CLUSTER_NAME}.ebiz.verizon.com" -u "$USERNAME" -p "$PASSWORD" --insecure-skip-tls-verify 2>/dev/null
   if [[ $? -ne 0 ]]; then
-    echo "Failed to log into cluster: $CLUSTER_NAME" >> "$OUTPUT_FILE"
+    echo "Failed to log into cluster: $CLUSTER_NAME"
     continue
   fi
 
   # Get all namespaces
   NAMESPACES=$(oc get namespaces -o jsonpath='{.items[*].metadata.name}')
   if [[ $? -ne 0 ]]; then
-    echo "Failed to fetch namespaces for cluster: $CLUSTER_NAME" >> "$OUTPUT_FILE"
+    echo "Failed to fetch namespaces for cluster: $CLUSTER_NAME"
     continue
   fi
 
-  # Write cluster name to the output file
-  echo "Cluster: $CLUSTER_NAME" >> "$OUTPUT_FILE"
+  # Determine the datacenter
+  DATACENTER=$(get_datacenter "$CLUSTER_NAME")
 
   # Loop through each namespace and check specific labels and annotation
   for NAMESPACE in $NAMESPACES; do
-    # Skip ignored namespaces
+    # Skip explicitly ignored namespaces
     if [[ " ${IGNORED_NAMESPACES[@]} " =~ " $NAMESPACE " ]]; then
       continue
     fi
 
-    echo "  Namespace: $NAMESPACE" >> "$OUTPUT_FILE"
+    # Skip namespaces containing "openshift" or "operator"
+    if [[ "$NAMESPACE" == *openshift* || "$NAMESPACE" == *operator* ]]; then
+      continue
+    fi
+
+    # Skip the namespace that matches the cluster name
+    if [[ "$NAMESPACE" == "$CLUSTER_NAME" ]]; then
+      continue
+    fi
 
     # Get specific labels
     LOB_LABEL=$(oc get namespace "$NAMESPACE" -o jsonpath='{.metadata.labels.onboarding\.xyz\.io/lob}' 2>/dev/null)
@@ -89,27 +111,15 @@ while IFS= read -r CLUSTER_NAME; do
     # Get specific annotation
     SUPPORT_POC_ANNOTATION=$(oc get namespace "$NAMESPACE" -o jsonpath='{.metadata.annotations.xyz\.com/support-poc}' 2>/dev/null)
 
-    # Check and write labels and annotation to the output file
-    if [[ -z "$LOB_LABEL" ]]; then
-      echo "    Label - onboarding.xyz.io/lob: Not Found" >> "$OUTPUT_FILE"
-    else
-      echo "    Label - onboarding.xyz.io/lob: $LOB_LABEL" >> "$OUTPUT_FILE"
-    fi
+    # Default to "Not Found" if labels or annotation are missing
+    LOB_LABEL=${LOB_LABEL:-Not Found}
+    VAST_LABEL=${VAST_LABEL:-Not Found}
+    SUPPORT_POC_ANNOTATION=${SUPPORT_POC_ANNOTATION:-Not Found}
 
-    if [[ -z "$VAST_LABEL" ]]; then
-      echo "    Label - onboarding.xyz.io/vast: Not Found" >> "$OUTPUT_FILE"
-    else
-      echo "    Label - onboarding.xyz.io/vast: $VAST_LABEL" >> "$OUTPUT_FILE"
-    fi
-
-    if [[ -z "$SUPPORT_POC_ANNOTATION" ]]; then
-      echo "    Annotation - xyz.com/support-poc: Not Found" >> "$OUTPUT_FILE"
-    else
-      echo "    Annotation - xyz.com/support-poc: $SUPPORT_POC_ANNOTATION" >> "$OUTPUT_FILE"
-    fi
+    # Write the data to the CSV file
+    echo "$DATACENTER,nonprod,$CLUSTER_NAME,$NAMESPACE,$LOB_LABEL,$VAST_LABEL,$SUPPORT_POC_ANNOTATION" >> "$OUTPUT_FILE"
   done
 
-  echo "" >> "$OUTPUT_FILE" # Add a blank line for readability
 done < "$INPUT_FILE"
 
 echo "Processing complete. Output written to $OUTPUT_FILE."
