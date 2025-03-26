@@ -1,212 +1,96 @@
-You’re correct that using OpenShift’s user workload monitoring is a good approach in your scenario, especially if you want to keep your custom monitoring (like TLS certificate monitoring with the blackbox-exporter) separate from the cluster’s default monitoring stack and avoid modifying the openshift-monitoring namespace directly. The default Prometheus instance in openshift-monitoring is managed by the Cluster Monitoring Operator (CMO) and is primarily intended for cluster-level metrics (e.g., nodes, pods, etc.), with limited flexibility for custom workloads unless you have cluster-admin privileges and are comfortable tweaking its configuration. User workload monitoring, on the other hand, provides a dedicated Prometheus instance for user-defined projects, making it a cleaner and more maintainable solution for your use case.
-Let me clarify why this makes sense and then walk you through how to adapt the previous solution to use OpenShift user workload monitoring.
-
-Why User Workload Monitoring?
-	1	Separation of Concerns: The default Prometheus in openshift-monitoring is locked down and focused on cluster health. User workload monitoring lets you monitor custom applications (like your TLS certificate checks) without interfering with the cluster’s core monitoring.
-	2	RBAC and Namespace Isolation: You can deploy the blackbox-exporter and its ServiceMonitor in your own namespace (e.g., tls-monitoring), and the user workload Prometheus will scrape it without requiring changes to the openshift-monitoring namespace.
-	3	Scalability: It’s designed for user-defined workloads, so you can add more exporters or custom metrics later without worrying about impacting the cluster’s monitoring stack.
-	4	Default Grafana Integration: The user workload Prometheus integrates with the existing Grafana instance in OpenShift, though you might still need a custom dashboard.
-If you don’t have cluster-admin access or prefer not to modify the cluster-wide monitoring config (e.g., cluster-monitoring-config), user workload monitoring is indeed the better choice.
-
-Updated Steps Using OpenShift User Workload Monitoring
-Here’s how to achieve TLS certificate monitoring with the blackbox-exporter using OpenShift user workload monitoring, building on the previous guidance:
-
-Step 1: Enable User Workload Monitoring
-User workload monitoring isn’t enabled by default in OpenShift, so you’ll need to activate it. This requires cluster-admin privileges (or coordination with your cluster admin).
-	1	Edit the cluster-monitoring-config ConfigMap in the openshift-monitoring namespace: oc -n openshift-monitoring edit configmap cluster-monitoring-config
-	2	
-	3	Add or modify the enableUserWorkload field under data/config.yaml: apiVersion: v1
-	4	kind: ConfigMap
-	5	metadata:
-	6	  name: cluster-monitoring-config
-	7	  namespace: openshift-monitoring
-	8	data:
-	9	  config.yaml: |
-	10	    enableUserWorkload: true
-	11	
-	12	Save and exit. The Cluster Monitoring Operator will reconcile this change, deploying a Prometheus and Alertmanager instance in the openshift-user-workload-monitoring namespace. This may take a few minutes.
-	13	Verify the deployment: oc -n openshift-user-workload-monitoring get pods
-	14	 You should see pods like prometheus-user-workload-0, prometheus-user-workload-1, and alertmanager-user-workload-0.
-
-Step 2: Deploy the Blackbox Exporter
-Deploy the blackbox-exporter in your custom namespace (e.g., tls-monitoring), as described earlier. Here’s a recap:
-	1	Create the namespace: oc new-project tls-monitoring
-	2	
-	3	Apply the blackbox-exporter Deployment and Service (blackbox-exporter.yaml): apiVersion: apps/v1
-	4	kind: Deployment
-	5	metadata:
-	6	  name: blackbox-exporter
-	7	  namespace: tls-monitoring
-	8	  labels:
-	9	    app: blackbox-exporter
-	10	spec:
-	11	  replicas: 1
-	12	  selector:
-	13	    matchLabels:
-	14	      app: blackbox-exporter
-	15	  template:
-	16	    metadata:
-	17	      labels:
-	18	        app: blackbox-exporter
-	19	    spec:
-	20	      containers:
-	21	      - name: blackbox-exporter
-	22	        image: quay.io/prometheus/blackbox-exporter:latest
-	23	        ports:
-	24	        - containerPort: 9115
-	25	          name: http
-	26	        volumeMounts:
-	27	        - name: config
-	28	          mountPath: /config
-	29	        args:
-	30	        - --config.file=/config/blackbox.yml
-	31	      volumes:
-	32	      - name: config
-	33	        configMap:
-	34	          name: blackbox-exporter-config
-	35	---
-	36	apiVersion: v1
-	37	kind: Service
-	38	metadata:
-	39	  name: blackbox-exporter
-	40	  namespace: tls-monitoring
-	41	  labels:
-	42	    app: blackbox-exporter
-	43	spec:
-	44	  ports:
-	45	  - port: 9115
-	46	    targetPort: 9115
-	47	    protocol: TCP
-	48	    name: http
-	49	  selector:
-	50	    app: blackbox-exporter
-	51	
-	52	Apply the ConfigMap (blackbox-config.yaml): apiVersion: v1
-	53	kind: ConfigMap
-	54	metadata:
-	55	  name: blackbox-exporter-config
-	56	  namespace: tls-monitoring
-	57	data:
-	58	  blackbox.yml: |
-	59	    modules:
-	60	      https_2xx:
-	61	        prober: http
-	62	        timeout: 5s
-	63	        http:
-	64	          method: GET
-	65	          fail_if_not_ssl: true
-	66	          follow_redirects: false
-	67	          preferred_ip_protocol: ipv4
-	68	
-	69	Deploy the resources: oc apply -f blackbox-exporter.yaml
-	70	oc apply -f blackbox-config.yaml
-	71	
-
-Step 3: Configure Prometheus to Scrape Blackbox Metrics
-The user workload Prometheus instance uses the Prometheus Operator and automatically discovers ServiceMonitor resources in user namespaces. Create a ServiceMonitor to tell it to scrape the blackbox-exporter.
-	1	Create the ServiceMonitor (blackbox-servicemonitor.yaml): apiVersion: monitoring.coreos.com/v1
-	2	kind: ServiceMonitor
-	3	metadata:
-	4	  name: blackbox-exporter
-	5	  namespace: tls-monitoring
-	6	  labels:
-	7	    k8s-app: blackbox-exporter
-	8	spec:
-	9	  selector:
-	10	    matchLabels:
-	11	      app: blackbox-exporter
-	12	  endpoints:
-	13	  - port: http
-	14	    path: /probe
-	15	    params:
-	16	      module:
-	17	      - https_2xx
-	18	    targetPort: 9115
-	19	    interval: 30s
-	20	    scheme: http
-	21	    relabelConfigs:
-	22	    - sourceLabels: [_address_]
-	23	      targetLabel: __param_target
-	24	    - sourceLabels: [__param_target]
-	25	      targetLabel: instance
-	26	    - targetLabel: _address_
-	27	      replacement: blackbox-exporter.tls-monitoring.svc:9115
-	28	  staticConfigs:
-	29	  - targets:
-	30	    - https://example.com
-	31	    - https://another-example.com
-	32	
-	◦	Replace the targets with the HTTPS endpoints you want to monitor (e.g., external services or OpenShift routes).
-	◦	The replacement field uses the service’s fully qualified name in your namespace.
-	33	Apply the ServiceMonitor: oc apply -f blackbox-servicemonitor.yaml
-	34	
-	35	Verify the user workload Prometheus is scraping the targets:
-	◦	Get the Prometheus route: oc -n openshift-user-workload-monitoring get route prometheus-user-workload
-	◦	
-	◦	Open the URL in a browser, log in with an OpenShift token (e.g., oc whoami -t), and navigate to Status > Targets. You should see the blackbox-exporter targets with a status of “UP.”
-
-Step 4: Visualize Metrics in Grafana
-The default Grafana instance in openshift-monitoring is read-only and connected to the cluster Prometheus, not the user workload Prometheus. However, you can access the user workload Prometheus metrics via Thanos Querier (which federates both cluster and user workload data) or deploy a custom Grafana instance.
-Option 1: Use Default Grafana with Thanos Querier
-	1	Access Grafana via the OpenShift console (Monitoring > Dashboards).
-	2	The default data source (thanos-querier) already includes user workload metrics once enableUserWorkload is true.
-	3	Create a custom dashboard with a query like: (probe_ssl_earliest_cert_expiry - time()) / 86400
-	4	 This shows the number of days until certificate expiry.
-Option 2: Deploy a Custom Grafana Instance
-If you need an editable dashboard:
-	1	Install the Grafana Operator via OperatorHub in the tls-monitoring namespace.
-	2	Create a GrafanaDataSource to connect to the user workload Prometheus: apiVersion: integreatly.org/v1alpha1
-	3	kind: GrafanaDataSource
-	4	metadata:
-	5	  name: user-workload-prometheus
-	6	  namespace: tls-monitoring
-	7	spec:
-	8	  name: Prometheus User Workload
-	9	  datasources:
-	10	  - name: Prometheus
-	11	    type: prometheus
-	12	    access: proxy
-	13	    url: https://prometheus-user-workload.openshift-user-workload-monitoring.svc:9091
-	14	    isDefault: true
-	15	    jsonData:
-	16	      tlsSkipVerify: true
-	17	      timeInterval: 30s
-	18	    secureJsonData:
-	19	      token: ""
-	20	
-	◦	Replace with a service account token (e.g., oc sa get-token -n tls-monitoring).
-	21	Import dashboard ID 13659 (Blackbox Exporter HTTP Prober) from Grafana Labs and configure it with the data source.
-
-Step 5: Set Up Alerts
-Create a PrometheusRule in the tls-monitoring namespace to alert 30 days before certificate expiry (tls-alerts.yaml):
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: tls-certificate-expiry
+  name: blackbox-exporter
   namespace: tls-monitoring
+  labels:
+    app: blackbox-exporter
 spec:
-  groups:
-  - name: tls-certificate-rules
-    rules:
-    - alert: TLSCertificateExpiringSoon
-      expr: (probe_ssl_earliest_cert_expiry - time()) / 86400 < 30
-      for: 5m
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blackbox-exporter
+  template:
+    metadata:
       labels:
-        severity: warning
-      annotations:
-        summary: "TLS certificate for {{ $labels.instance }} is expiring soon"
-        description: "The TLS certificate for {{ $labels.instance }} will expire in {{ $value | printf \"%.2f\" }} days."
-Apply it:
-oc apply -f tls-alerts.yaml
-Alerts will appear in the user workload Alertmanager (accessible via oc -n openshift-user-workload-monitoring get route alertmanager-user-workload).
-
-Step 6: Test and Validate
-	•	Check the blackbox-exporter pod: oc -n tls-monitoring get pods
-	•	
-	•	Query metrics in the user workload Prometheus UI (e.g., probe_ssl_earliest_cert_expiry).
-	•	Verify the Grafana dashboard shows certificate expiry data.
-	•	Test the alert by adjusting the threshold (e.g., < 100) and checking the Alertmanager UI.
-
-Correction or Clarification
-You’re not “wrong” to suggest user workload monitoring—it’s a solid choice! My initial response assumed you might want to use the default stack directly, but user workload monitoring aligns better with OpenShift’s design for custom monitoring. The key difference is that you’ll rely on the Prometheus instance in openshift-user-workload-monitoring instead of openshift-monitoring, which simplifies permissions and avoids conflicts with cluster-level monitoring.
-Let me know if you need help with any specific step or run into issues!
+        app: blackbox-exporter
+    spec:
+      containers:
+      - name: blackbox-exporter
+        image: quay.io/prometheus/blackbox-exporter:latest
+        ports:
+        - containerPort: 9115
+          name: http
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        args:
+        - --config.file=/config/blackbox.yml
+      volumes:
+      - name: config
+        configMap:
+          name: blackbox-exporter-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blackbox-exporter
+  namespace: tls-monitoring
+  labels:
+    app: blackbox-exporter
+spec:
+  ports:
+  - port: 9115
+    targetPort: 9115
+    protocol: TCP
+    name: http
+  selector:
+    app: blackbox-exporter
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-exporter-config
+  namespace: tls-monitoring
+data:
+  blackbox.yml: |
+    modules:
+      https_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          method: GET
+          fail_if_not_ssl: true
+          follow_redirects: false
+          preferred_ip_protocol: ipv4
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: blackbox-exporter
+  namespace: tls-monitoring
+  labels:
+    k8s-app: blackbox-exporter
+spec:
+  selector:
+    matchLabels:
+      app: blackbox-exporter
+  endpoints:
+  - port: http
+    path: /probe
+    params:
+      module:
+      - https_2xx
+    targetPort: 9115
+    interval: 30s
+    scheme: http
+    relabelConfigs:
+    - sourceLabels: [_address_]
+      targetLabel: __param_target
+    - sourceLabels: [__param_target]
+      targetLabel: instance
+    - targetLabel: _address_
+      replacement: blackbox-exporter.tls-monitoring.svc:9115
+  staticConfigs:
+  - targets:
+    - https://example.com
