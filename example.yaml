@@ -1,18 +1,55 @@
-University(Cluster)
-├── Department(Tenant): School of Engineering
-│   ├── Course(Namespace): Computer Science
-│   │   ├── Class(App): Java Programming
-│   │   └── Class(App): Data Structures
-│   └── CourseNamespace): Mechanical Engineering
-│       ├── Class(App): Thermodynamics
-│       └── Class(App): Fluid Mechanics
-└── Department(Tenant): School of Arts
-    ├── Course(Namespace): Literature
-    │   ├── Class(App): English Literature
-    │   └── Class(App): World Literature
-    └── Course: History
-        ├── Class(App): Ancient History
-        └── Class(App): Modern History
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  creationTimestamp: '2025-03-27T19:38:39Z'
+  generation: 4
+  labels:
+    k8s-app: blackbox-exporter
+  managedFields:
+    - apiVersion: monitoring.coreos.com/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:metadata':
+          'f:labels':
+            .: {}
+            'f:k8s-app': {}
+        'f:spec':
+          .: {}
+          'f:endpoints': {}
+          'f:selector': {}
+      manager: Mozilla
+      operation: Update
+      time: '2025-03-27T20:51:27Z'
+  name: blackbox-exporter
+  namespace: j14v-dev-blackbox-exporter
+  resourceVersion: '22751529'
+  uid: 88b3d59c-e0c1-45c1-91d5-eba8e1103fd9
+spec:
+  endpoints:
+    - interval: 30s
+      params:
+        module:
+          - http_2xx_ssl
+        target:
+          - 'https://api.tdclabocpj14v.ebiz.xyz.com:6443'
+      path: /probe
+      port: http
+      scheme: http
+      targetPort: 9115
+    - interval: 30s
+      params:
+        module:
+          - http_2xx_ssl
+        target:
+          - 'https://j14v.apps.tdclabocpj14v.ebiz.xyz.com:443'
+      path: /probe
+      port: http
+      scheme: http
+      targetPort: 9115
+  selector:
+    matchLabels:
+      app: blackbox-exporter
+
 
 
 When will we review the dedicated cluster folder structure? We have been continuously onboarding namespaces into it, and it may become challenging to adjust them later.
