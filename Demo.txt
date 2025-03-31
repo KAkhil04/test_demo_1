@@ -51,6 +51,28 @@ spec:
 EOF
 
     echo "Created $output_file"
+    
+    # Login to the cluster and apply the configuration
+    echo "Logging into cluster: ${cluster_name}"
+    oc login "https://api.${cluster_name}.ebiz.com:6443" -u kurelak -p ranch0123
+    
+    if [ $? -eq 0 ]; then
+        echo "Successfully logged into ${cluster_name}"
+        echo "Applying ServiceMonitor configuration..."
+        oc apply -f "$output_file"
+        
+        if [ $? -eq 0 ]; then
+            echo "Successfully applied ServiceMonitor for ${cluster_name}"
+        else
+            echo "Failed to apply ServiceMonitor for ${cluster_name}"
+        fi
+    else
+        echo "Failed to login to ${cluster_name}"
+    fi
+    
+    # Optional: Clean up the file after applying
+    # rm -f "$output_file"
+    
 done < "input.txt"
 
-echo "ServiceMonitor file generation completed!"
+echo "ServiceMonitor generation and application completed!"
