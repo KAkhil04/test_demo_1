@@ -1,28 +1,56 @@
-curl -X POST https://gitlab.com/api/v4/projects/227878/trigger/pipeline \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "token=glptt-8f4574eb7a0f057350b2a71f84a3a8a211a65dae" \
-     -d "ref=master" \
-     -d "variables[NONPROD_OR_PROD]=nonprod" \
-     -d "variables[TSHIRT]=xxl" \
-     -d "variables[VSAD]=b6vv" \
-     -d "variables[DEV]=true" \
-     -d "variables[QA]=false" \
-     -d "variables[SIT]=false" \
-     -d "variables[STG]=false" \
-     -d "variables[UAT]=false" \
-     -d "variables[PREPROD]=false" \
-     -d "variables[GREENFIELD]=false" \
-     -d "variables[APP]=vbg" \
-     -d "variables[SERVICEACCOUNT]=tdc-b6vv-dev-vbg-ocp-sa" \
-     -d "variables[TAMPA_ENABLED]=false" \
-     -d "variables[TWINSBURG_ENABLED]=true" \
-     -d "variables[SAC_ENABLED]=false" \
-     -d "variables[ADMIN_AD_GROUPS]=vbg_kube_prod_b6vv_admin,vbg_kube_prod_b6vv_admin_vdsi" \
-     -d "variables[DEV_AD_GROUPS]=vbg_kube_prod_b6vv_view,vbg_kube_prod_b6vv_view_vdsi" \
-     -d "variables[AD_DOMAIN_USWIN]=vbg_kube_prod_b6vv_admin,vbg_kube_prod_b6vv_view" \
-     -d "variables[AD_DOMAIN_ADEBP]=" \
-     -d "variables[AD_DOMAIN_EMEA]=" \
-     -d "variables[AD_DOMAIN_VDSI]=vbg_kube_prod_b6vv_admin_vdsi,vbg_kube_prod_b6vv_view" \
-     -d "variables[UUID]=" \
-     -d "variables[ANNOTATIONS]=vzw-sre-platformdesign@verizon.com" \
-     -d "variables[DEDICATED_CLUSTER_ENABLED]=false"
+#!/bin/bash
+
+# Check if input.txt exists
+if [ ! -f "input.txt" ]; then
+    echo "Error: input.txt file not found!"
+    exit 1
+fi
+
+# Read each line from input.txt
+while IFS= read -r cluster_name; do
+    # Skip empty lines
+    [ -z "$cluster_name" ] && continue
+    
+    # Define the output filename
+    output_file="servicemonitor-${cluster_name}.yaml"
+    
+    # Create the servicemonitor YAML content
+    cat << EOF > "$output_file"
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ${cluster_name}-monitor
+  namespace: monitoring
+spec:
+  endpoints:
+  - port: https
+    scheme: https
+    path: /metrics
+    targetPort: 6443
+    interval: 30s
+    tlsConfig:
+      insecureSkipVerify: true
+    relabelings:
+    - sourceLabels: [__address__]
+      targetLabel: __address__
+      replacement: api.${cluster_name}.ebiz.com:6443
+  - port: https
+    scheme: https
+    path: /metrics
+    targetPort: 443
+    interval: 30s
+    tlsConfig:
+      insecureSkipVerify: true
+    relabelings:
+    - sourceLabels: [__address__]
+      targetLabel: __address__
+      replacement: j14v.apps.${cluster_name}.ebiz.com:443
+  selector:
+    matchLabels:
+      app: ${cluster_name}-service
+EOF
+
+    echo "Created $output_file"
+done < "input.txt"
+
+echo "ServiceMonitor file generation completed!"
