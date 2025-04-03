@@ -1,47 +1,54 @@
 #!/bin/bash
 
 # Check if input.txt exists
-if [ ! -f "input.txt" ]; then
+if [[ ! -f "input.txt" ]]; then
     echo "Error: input.txt file not found"
     exit 1
 fi
 
-# Read cluster names from input.txt line by line
-while IFS= read -r clustername; do
+# Check if image-pull-secret.yaml exists
+if [[ ! -f "image-pull-secret.yaml" ]]; then
+    echo "Error: image-pull-secret.yaml file not found"
+    exit 1
+fi
+
+# Check if required commands are available
+for cmd in oc kubeseal; do
+    if ! command -v "$cmd" &> /dev/null; then
+        echo "Error: $cmd is not installed or not in PATH"
+        exit 1
+    fi
+done
+
+# Read cluster names from input.txt
+while IFS= read -r clustername || [[ -n "$clustername" ]]; do
     # Skip empty lines
-    [ -z "$clustername" ] && continue
+    [[ -z "$clustername" ]] && continue
     
     echo "Processing cluster: $clustername"
     
     # Login to OCP cluster
-    oc login "https://api.${clustername}.ebiz.xyz.com:6443" -u kurelak
+    oc login "https://api.${clustername}.ebiz.xyz.com:6443" -u kurelak --insecure-skip-tls-verify
     
-    # Check if login was successful
-    if [ $? -ne 0 ]; then
+    if [[ $? -ne 0 ]]; then
         echo "Error: Failed to login to cluster $clustername"
         continue
     }
     
     # Process the secret
-    cat image-pull-secret.yaml | kubeseal \
+    if ! cat image-pull-secret.yaml | kubeseal \
         --controller-namespace bitnami-sealed-secrets \
         --controller-name bitnami-sealed-secrets \
-        --format yaml > sealed-secret.yaml
-    
-    # Check if kubeseal command was successful
-    if [ $? -ne 0 ]; then
+        --format yaml > sealed-secret.yaml; then
         echo "Error: Failed to process secret for cluster $clustername"
         continue
-    }
+    fi
     
     # Apply the sealed secret
-    oc apply -f sealed-secret.yaml
-    
-    # Check if apply was successful
-    if [ $? -ne 0 ]; then
+    if ! oc apply -f sealed-secret.yaml; then
         echo "Error: Failed to apply sealed secret to cluster $clustername"
         continue
-    }
+    fi
     
     echo "Successfully processed cluster: $clustername"
     echo "------------------------------------"
