@@ -51,6 +51,16 @@ while IFS= read -r clustername || [[ -n "$clustername" ]]; do
         continue
     fi
     
+    # Check and delete existing SealedSecret if it exists
+    if oc get sealedsecret my-pull-secret &> /dev/null; then
+        echo "Existing SealedSecret 'my-pull-secret' found, deleting it..."
+        oc delete sealedsecret my-pull-secret
+        if [[ $? -ne 0 ]]; then
+            echo "Error: Failed to delete existing SealedSecret for cluster $clustername"
+            continue
+        fi
+    fi
+    
     # Create the image pull secret
     oc create secret docker-registry my-pull-secret \
         --docker-server="$REGISTRY_SERVER" \
