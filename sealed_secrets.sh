@@ -12,7 +12,7 @@ if [[ ! -f "image-pull-secret.yaml" ]]; then
     exit 1
 fi
 
-# Check if required commands are available
+# Check for required commands
 for cmd in oc kubeseal; do
     if ! command -v "$cmd" &> /dev/null; then
         echo "Error: $cmd is not installed or not in PATH"
@@ -29,30 +29,30 @@ while IFS= read -r clustername || [[ -n "$clustername" ]]; do
     
     # Login to OCP cluster
     oc login "https://api.${clustername}.ebiz.xyz.com:6443" -u kurelak --insecure-skip-tls-verify
-    
     if [[ $? -ne 0 ]]; then
         echo "Error: Failed to login to cluster $clustername"
         continue
-    }
+    fi
     
-    # Process the secret
-    if ! cat image-pull-secret.yaml | kubeseal \
+    # Process the secret (fixed line continuation)
+    cat image-pull-secret.yaml | kubeseal \
         --controller-namespace bitnami-sealed-secrets \
         --controller-name bitnami-sealed-secrets \
-        --format yaml > sealed-secret.yaml; then
+        --format yaml > sealed-secret.yaml
+    if [[ $? -ne 0 ]]; then
         echo "Error: Failed to process secret for cluster $clustername"
         continue
     fi
     
     # Apply the sealed secret
-    if ! oc apply -f sealed-secret.yaml; then
+    oc apply -f sealed-secret.yaml
+    if [[ $? -ne 0 ]]; then
         echo "Error: Failed to apply sealed secret to cluster $clustername"
         continue
     fi
     
     echo "Successfully processed cluster: $clustername"
     echo "------------------------------------"
-    
 done < "input.txt"
 
 echo "Script execution completed"
