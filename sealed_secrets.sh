@@ -1,12 +1,26 @@
 #!/bin/bash
 
-# Check for required environment variables
-if [[ -z "$REGISTRY_SERVER" || -z "$REGISTRY_USERNAME" || -z "$REGISTRY_PASSWORD" ]]; then
-    echo "Error: Please set REGISTRY_SERVER, REGISTRY_USERNAME, and REGISTRY_PASSWORD environment variables"
+# Prompt for registry details
+read -p "Enter registry server (e.g., docker.io): " REGISTRY_SERVER
+if [[ -z "$REGISTRY_SERVER" ]]; then
+    echo "Error: Registry server cannot be empty"
     exit 1
 fi
 
-# Optional email, can be empty
+read -p "Enter registry username: " REGISTRY_USERNAME
+if [[ -z "$REGISTRY_USERNAME" ]]; then
+    echo "Error: Registry username cannot be empty"
+    exit 1
+fi
+
+read -s -p "Enter registry password: " REGISTRY_PASSWORD
+echo "" # Newline after password input
+if [[ -z "$REGISTRY_PASSWORD" ]]; then
+    echo "Error: Registry password cannot be empty"
+    exit 1
+fi
+
+read -p "Enter registry email (press Enter for default 'default@example.com'): " REGISTRY_EMAIL
 REGISTRY_EMAIL=${REGISTRY_EMAIL:-"default@example.com"}
 
 # Check if input.txt exists
