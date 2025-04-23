@@ -1,11 +1,40 @@
 #!/bin/bash
 
-read -p "OCP User: " OU; read -s -p "OCP Pass: " OP; echo ""
+# Prompt for OCP credentials
+read -p "OCP User: " OU
+read -s -p "OCP Pass: " OP
+echo ""
 
-for c in $(<input.txt); do
-    oc login "https://api.$c.verizon.com:6443" -u "$OU" -p "$OP" || continue
-    oc project $PJ
-    << apiVersion: monitoring.coreos.com/v1
+# Check if input.txt exists
+if [[ ! -f input.txt ]]; then
+    echo "Error: input.txt not found"
+    exit 1
+fi
+
+# Check if PJ variable is set
+if [[ -z "$PJ" ]]; then
+    read -p "Enter project name: " PJ
+fi
+
+while IFS= read -r c; do
+    # Skip empty lines
+    [[ -z "$c" ]] && continue
+
+    # Attempt OCP login
+    if ! oc login "https://api.$c.verizon.com:6443" -u "$OU" -p "$OP" --insecure-skip-tls-verify; then
+        echo "Failed to login to cluster $c"
+        continue
+    fi
+
+    # Set project
+    if ! oc project "$PJ" >/dev/null 2>&1; then
+        echo "Failed to set project $PJ in cluster $c"
+        continue
+    fi
+
+    # Create ServiceMonitor YAML
+    cat << EOF > servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: blackbox-exporter
@@ -19,7 +48,7 @@ spec:
         module:
           - http_2xx_ssl
         target:
-          - 'https://api.$c.verizon.com:6443'
+          - https://api.$c.verizon.com:6443
       path: /probe
       port: http
       relabelings:
@@ -34,7 +63,7 @@ spec:
         module:
           - http_2xx_ssl
         target:
-          - 'https://j14v.apps.$c.verizon.com:443'
+          - https://j14v.apps.$c.verizon.com:443
       path: /probe
       port: http
       relabelings:
@@ -47,8 +76,17 @@ spec:
   selector:
     matchLabels:
       app: blackbox-exporter
->> servicemonitor.yaml
-   oc apply -f servicemonitor.yaml -n blackbox-exporter
-done
+EOF
 
+    # Apply ServiceMonitor
+    if ! oc apply -f servicemonitor.yaml -n blackbox-exporter; then
+        echo "Failed to apply ServiceMonitor in cluster $c"
+        continue
+    fi
+
+    echo "Successfully processed cluster $c"
+done < input.txt
+
+# Clean up
+rm -f servicemonitor.yaml
 echo "Done."
