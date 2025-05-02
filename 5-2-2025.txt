@@ -1,2 +1,1 @@
-oc get deployments -o json | jq -r '.items[] | select(.metadata.labels.app | startswith("l3-")) | .metadata.name + "\t" + (.spec.template.spec.containers[].image | join("\n"))'
-jq: error (at <stdin>:40473): startswith() requires string inputs
+oc get deployments -o json | jq -r '.items[] | select(.metadata.labels.app? | type == "string" and startswith("l3-")) | .metadata.name + "\t" + (.spec.template.spec.containers[].image | join("\n"))'
