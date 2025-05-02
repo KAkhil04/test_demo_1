@@ -1,1 +1,2 @@
 oc get deployments -o json | jq -r '.items[] | select(.metadata.labels."project.name"? | type == "string" and startswith("l3-")) | .metadata.name + "\t" + (.spec.template.spec.containers[].image | join("\n"))'
+jq: error (at <stdin>:40473): Cannot iterate over string ("nt4v-docke...)
