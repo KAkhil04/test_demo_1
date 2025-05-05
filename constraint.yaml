@@ -2,14 +2,34 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: AutomountServiceAccountToken
 metadata:
   name: enforce-automountserviceaccounttoken
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "1"
+    description: >-
+      Enforces that automountServiceAccountToken is explicitly set to false for Pods in approved namespaces, excluding platform and app namespaces.
 spec:
+  enforcementAction: dryrun # Use "dryrun" initially for testing; change to "deny" after validation
   match:
     kinds:
       - apiGroups: [""]
         kinds: ["Pod"]
   parameters:
-    excludedNamespaces:
+    excludePlatformNamespace:
       - "openshift-*"
       - "kube-system"
       - "default"
-      - "platform-*"
+      - "cert-manager"
+      - "community-operators"
+      - "*-operator"
+      - "grafana"
+      - "istio-system"
+      - "kiali"
+      - "sysdig"
+      - "trident"
+    excludeAppNamespace:
+      - "appdev-gitops"
+      - "user-workload-monitoring-test"
+      - "willitconnect"
+      - "istio-testing"
+      - "blackbox-exporter"
+      - "custom-app-*"
