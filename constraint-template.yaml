@@ -1,12 +1,33 @@
-apiVersion: templates.gatekeeper.sh/v1
+apiVersion: templates.gatekeeper.sh/v1beta1
 kind: ConstraintTemplate
 metadata:
   name: automountserviceaccounttoken
+  annotations:
+    metadata.gatekeeper.sh/title: "Enforce automountServiceAccountToken for Pods"
+    metadata.gatekeeper.sh/version: 1.0.1
+    description: >-
+      Ensures that automountServiceAccountToken is explicitly set to false for Pods in approved namespaces, excluding platform and app namespaces.
 spec:
   crd:
     spec:
       names:
         kind: AutomountServiceAccountToken
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          type: object
+          properties:
+            excludePlatformNamespace:
+              description: List of platform namespaces to exclude from enforcement
+              type: array
+              items:
+                type: string
+            excludeAppNamespace:
+              description: List of app namespaces to exclude from enforcement
+              type: array
+              items:
+                type: string
+
   targets:
     - target: admission.k8s.gatekeeper.sh
       rego: |
@@ -14,28 +35,21 @@ spec:
 
         violation[{"msg": msg}] {
           input.review.object.kind == "Pod"
-          input.review.object.metadata.namespace != ""
+          namespace := input.review.object.metadata.namespace
 
-          namespace = input.review.object.metadata.namespace
+          # Skip enforcement for platform namespaces
+          not namespace_excluded(namespace, input.parameters.excludePlatformNamespace)
 
-          # Exclude namespaces provided in the parameters
-          not namespace_excluded(namespace, input.parameters.excludedNamespaces)
+          # Skip enforcement for app namespaces
+          not namespace_excluded(namespace, input.parameters.excludeAppNamespace)
 
-          # Allow exceptions for pods with specific labels or annotations
-          not allowed_pod(input.review.object.metadata.labels, input.review.object.metadata.annotations)
-
-          # Check if automountServiceAccountToken is not explicitly set to false
+          # Enforce automountServiceAccountToken to be explicitly set to false
           not input.review.object.spec.automountServiceAccountToken == false
 
-          msg := sprintf("Pod %s in namespace %s does not have automountServiceAccountToken set to false", [input.review.object.metadata.name, namespace])
+          msg := sprintf("Pod %s in namespace %s must have automountServiceAccountToken set to false", [input.review.object.metadata.name, namespace])
         }
 
         # Helper function to check if a namespace is excluded
         namespace_excluded(namespace, excludedNamespaces) {
           namespace == excludedNamespaces[_]
-        }
-
-        # Helper function to allow exceptions for specific pods
-        allowed_pod(labels, annotations) {
-          labels["allow-automount-sa-token"] == "true"
         }
