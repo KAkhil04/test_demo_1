@@ -4,7 +4,7 @@ metadata:
   name: automountserviceaccounttoken
   annotations:
     metadata.gatekeeper.sh/title: "Enforce automountServiceAccountToken for Pods"
-    metadata.gatekeeper.sh/version: 1.0.4
+    metadata.gatekeeper.sh/version: 1.0.5
     description: >-
       Ensures that automountServiceAccountToken is explicitly set to false for Pods in approved namespaces, excluding platform and app namespaces.
 spec:
@@ -33,6 +33,7 @@ spec:
       rego: |
         package automountserviceaccounttoken
 
+        # Main violation rule
         violation[{"msg": msg}] {
           input.review.object.kind == "Pod"
           namespace := input.review.object.metadata.namespace
@@ -47,9 +48,18 @@ spec:
           # If token is true, provide a Jira ticket message
           token == true
           msg := sprintf("Pod %s in namespace %s has automountServiceAccountToken explicitly set to true. To proceed, submit a Jira ticket to the OCP Team (Cary Beuershausen) with a detailed justification for requiring this configuration. The team will review the request and provide approval or denial based on the cluster's security and operational policies.", [input.review.object.metadata.name, namespace])
+        }
 
-        } else {
-          # If token is not explicitly set to false, provide a generic message
+        # Separate rule for missing `false`
+        violation[{"msg": msg}] {
+          input.review.object.kind == "Pod"
+          namespace := input.review.object.metadata.namespace
+
+          # Skip enforcement for excluded namespaces
+          not namespace_excluded(namespace, input.parameters.excludePlatformNamespace)
+          not namespace_excluded(namespace, input.parameters.excludeAppNamespace)
+
+          # Deny if automountServiceAccountToken is not explicitly set to false
           not input.review.object.spec.automountServiceAccountToken == false
           msg := sprintf("Pod %s in namespace %s must have automountServiceAccountToken explicitly set to false.", [input.review.object.metadata.name, namespace])
         }
