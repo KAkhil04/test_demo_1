@@ -1,54 +1,9 @@
-apiVersion: templates.gatekeeper.sh/v1beta1
-kind: ConstraintTemplate
-metadata:
-  name: enablednamespace
-  annotations:
-    metadata.gatekeeper.sh/title: "Allows pods to be deployed on approved app namespaces"
-    metadata.gatekeeper.sh/version: 1.0.0
-    description: >-
-      Allows pods to be deployed on approved app namespaces
-spec:
-  crd:
-    spec:
-      names:
-        kind: enabledNamespace
-      validation:
-        # Schema for the `parameters` field
-        openAPIV3Schema:
-          type: object
-          properties:
-            excludedappnamespace:
-              description: Allows pods to be deployed on approved app namespaces
-              type: array
-              items:
-                type: string
-
-  targets:
-    - target: admission.k8s.gatekeeper.sh
-      rego: |
-        package enablednamespace
-        violation[{"msg": msg}] {
-          satisfied := [good | namespace = input.parameters.excludedappnamespace[_] ; good = contains(input.review.namespace, namespace)]
-          not any(satisfied)
-          msg := sprintf("%v App namespace is not approved" , [input.review.namespace])
-        }
-
----
-
-apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: enabledNamespace
-metadata:
-  name: enablednamespace
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "1"
-spec:
-  enforcementAction: deny
-  match:
-    kinds:
-      - apiGroups: [""]
-        kinds: ["Pod", "Deployment"]
-    excludedNamespaces: ["appdev-gitops", "bitnami-sealed-secrets", "cert-manager", "community-operators", "default", "grafana", "istio-system", "kiali", "open-cluster-*", "openshift*", "*-operator", "kube-*", "sysdig", "trident", "user-workload-monitoring-test", "willitconnect", "istio-testing", "blackbox-exporter"]
-  parameters:
-    excludedappnamespace:
-    - "abcd-"
+    - errors:
+        - code: ingest_error
+          message: "Could not ingest Rego: invalid ConstraintTemplate: 1 error occurred: template:18: rego_parse_error: else keyword cannot be used on multi-value rules\n\t} else {\n\t  ^"
+      id: gatekeeper-controller-manager-66c865b484-hpxsq
+      observedGeneration: 1
+      operations:
+        - mutation-webhook
+        - webhook
+      templateUID: b1219358-293f-49e9-9eee-90a457d9a8ed
