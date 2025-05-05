@@ -1,37 +1,14 @@
-apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: K8sRestrictServiceAccountToken
-metadata:
-  name: restrict-service-account-token
-spec:
-  enforcementAction: dryrun
-  match:
-    kinds:
-    - apiGroups: [ "" ]
-      kinds: [ "Pod" ]
-    namespaceSelector:
-      matchExpressions:
-      - key: kubernetes.io/metadata.name
-        operator: NotIn
-        values:
-        - default
-        - sysdig
-        - openshift
-        - appdev-gitops
-        - bitnami-sealed-secrets 
-        - cert-manager
-        - community-operators 
-        - grafana
-        - istio-system 
-        - kiali
-        - "open-cluster-* 
-        - "openshift*" 
-        - "*-operator"
-        - trident
-        - willitconnect 
-        - blackbox-exporter
-      - key: kubernetes.io/metadata.name
-        operator: DoesNotExist
-        values: [ "openshift-" ]
-      - key: kubernetes.io/metadata.name
-        operator: DoesNotExist
-        values: [ "kube-" ]
+Gatekeeper
+
+From data security:
+We are working on OCP4-CIS profiles where ,  rule - ocp4-cis-accounts-restrict-service-account-tokens stating as below
+ 
+" Service accounts tokens should not be mounted in pods except where the workload running in the pod explicitly needs to communicate with the API server. To ensure pods do not automatically mount tokens, set automountServiceAccountToken to false".
+ 
+Risk :Making automount SA as true will make pod explicitly access the token and make unauthorize API request potentially affecting the cluster state.
+ 
+We see 530 pods doesn't have the flag set as automountServiceAccountToken to false .Can you please add those flag and set to true or false as required .
+ 
+oc get pods -A  -oyaml -o custom-columns=NAME:.metadata.name,Project:.metadata.namespace,SAToken:.spec.automountServiceAccountToken  | grep -i -v false
+ 
+Note: Most of the pods referenced are platform-related and will be ignored. We need to create a policy which will effect the app namespaces but ignore platform namespaces.
