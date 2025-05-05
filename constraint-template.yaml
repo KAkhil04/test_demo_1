@@ -4,7 +4,7 @@ metadata:
   name: automountserviceaccounttoken
   annotations:
     metadata.gatekeeper.sh/title: "Enforce automountServiceAccountToken for Pods"
-    metadata.gatekeeper.sh/version: 1.0.1
+    metadata.gatekeeper.sh/version: 1.0.3
     description: >-
       Ensures that automountServiceAccountToken is explicitly set to false for Pods in approved namespaces, excluding platform and app namespaces.
 spec:
@@ -13,7 +13,6 @@ spec:
       names:
         kind: AutomountServiceAccountToken
       validation:
-        # Schema for the `parameters` field
         openAPIV3Schema:
           type: object
           properties:
@@ -43,10 +42,26 @@ spec:
           # Skip enforcement for app namespaces
           not namespace_excluded(namespace, input.parameters.excludeAppNamespace)
 
-          # Enforce automountServiceAccountToken to be explicitly set to false
+          # Deny if automountServiceAccountToken is explicitly set to true
+          input.review.object.spec.automountServiceAccountToken == true
+
+          msg := sprintf("Pod %s in namespace %s has automountServiceAccountToken explicitly set to true. To proceed, submit a Jira ticket to the OCP Team (Cary Beuershausen) with a detailed justification for requiring this configuration. The team will review the request and provide approval or denial based on the cluster's security and operational policies.", [input.review.object.metadata.name, namespace])
+        }
+
+        violation[{"msg": msg}] {
+          input.review.object.kind == "Pod"
+          namespace := input.review.object.metadata.namespace
+
+          # Skip enforcement for platform namespaces
+          not namespace_excluded(namespace, input.parameters.excludePlatformNamespace)
+
+          # Skip enforcement for app namespaces
+          not namespace_excluded(namespace, input.parameters.excludeAppNamespace)
+
+          # Deny if automountServiceAccountToken is not explicitly set to false
           not input.review.object.spec.automountServiceAccountToken == false
 
-          msg := sprintf("Pod %s in namespace %s must have automountServiceAccountToken set to false", [input.review.object.metadata.name, namespace])
+          msg := sprintf("Pod %s in namespace %s must have automountServiceAccountToken explicitly set to false.", [input.review.object.metadata.name, namespace])
         }
 
         # Helper function to check if a namespace is excluded
