@@ -1,27 +1,15 @@
 apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: K8sRestrictServiceAccountToken
+kind: AutomountServiceAccountToken
 metadata:
-  name: restrict-service-account-token
+  name: enforce-automountserviceaccounttoken
 spec:
   match:
     kinds:
       - apiGroups: [""]
         kinds: ["Pod"]
-    namespaceSelector:
-      matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: NotIn
-          values:
-            - default
-            - kube-system
-            - kube-public
-            - kube-node-lease
-            - openshift
-            - openshift-infra
-            - openshift-monitoring
-        - key: kubernetes.io/metadata.name
-          operator: DoesNotExist
-          values: ["openshift-"]
-        - key: kubernetes.io/metadata.name
-          operator: DoesNotExist
-          values: ["kube-"]
+  parameters:
+    excludedNamespaces:
+      - "openshift-*"
+      - "kube-system"
+      - "default"
+      - "platform-*"
