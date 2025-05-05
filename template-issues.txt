@@ -1,0 +1,37 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRestrictServiceAccountToken
+metadata:
+  name: restrict-service-account-token
+spec:
+  enforcementAction: dryrun
+  match:
+    kinds:
+    - apiGroups: [ "" ]
+      kinds: [ "Pod" ]
+    namespaceSelector:
+      matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        - default
+        - sysdig
+        - openshift
+        - appdev-gitops
+        - bitnami-sealed-secrets 
+        - cert-manager
+        - community-operators 
+        - grafana
+        - istio-system 
+        - kiali
+        - "open-cluster-* 
+        - "openshift*" 
+        - "*-operator"
+        - trident
+        - willitconnect 
+        - blackbox-exporter
+      - key: kubernetes.io/metadata.name
+        operator: DoesNotExist
+        values: [ "openshift-" ]
+      - key: kubernetes.io/metadata.name
+        operator: DoesNotExist
+        values: [ "kube-" ]
