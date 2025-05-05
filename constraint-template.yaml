@@ -1,0 +1,20 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srestrictserviceaccounttoken
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRestrictServiceAccountToken
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srestrictserviceaccounttoken
+
+        violation[{"msg": msg}] {
+          input.review.object.kind == "Pod"
+          input.review.object.spec.automountServiceAccountToken != false
+          not input.review.object.metadata.labels["allow-automount-token"] == "true"
+          msg := sprintf("Pod %v in namespace %v must have automountServiceAccountToken set to false unless labeled with allow-automount-token: true", [input.review.object.metadata.name, input.review.object.metadata.namespace])
+        }
