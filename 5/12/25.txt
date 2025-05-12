@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+    <!-- Font cache directory list -->
+    <cachedir>/usr/lib/fontconfig/cache</cachedir>
+    <cachedir>/tmp/fontconfig-cache</cachedir>
+    <!-- Remove or comment out the read-only cache directory -->
+    <!-- <cachedir>~/.fontconfig</cachedir> -->
+    <config>
+        <!-- Add any additional configuration here if needed -->
+    </config>
+</fontconfig>
