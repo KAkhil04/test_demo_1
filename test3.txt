@@ -1,95 +1,106 @@
-Using the ocp4-rbac-limit-cluster-admin rule as an example, it is a best practice recommendation:
-Review users and groups bound to cluster-admin and decide whether they
-  require such access. Consider creating least-privilege roles for users and
-  service accounts.
-A review of access cannot be passed or failed by a rule. We manage cluster admin access via ADOM/RBAC.
-As another example, ocp4-rbac-limit-secrets-access is another best practice.
-The Kubernetes API stores secrets, which may be service account tokens
-  for the Kubernetes API or credentials used by workloads in the cluster. Access to
-  these secrets should be restricted to the smallest possible group of users to reduce
-  the risk of privilege escalation. To restrict users from secrets, remove get , list
-  , and watch access to unauthorized users to secret objects in the cluster.
-We provide two RBAC levels, namespace admin and developer. Admins can manage secrets WITHIN THEIR NAMESPACE ONLY, while developers cannot even see secrets.  So this is managed through ADOM/RBAC just like cluster admin.
+In one of the pod when i tried to fetch fc-list, I have seen the below error.
+sh-5.2$ fc-list
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Medium
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-ExtraLight.ttf: DejaVu Sans,DejaVu Sans Light:style=ExtraLight
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-BoldOblique.ttf: DejaVu Sans Mono:style=Bold Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-Bold.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Bold,Bold
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=SemiBold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Bold Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed,Book
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-Bold.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Bold,Bold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-Bold.ttf: DejaVu Serif:style=Bold
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Oblique.ttf: DejaVu Sans:style=Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-BoldItalic.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Bold Italic,Bold Italic
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-Oblique.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Oblique,Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed,Book
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Bold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Medium Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-Italic.ttf: DejaVu Serif:style=Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Bold.ttf: DejaVu Sans:style=Bold
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Regular
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf: DejaVu Sans:style=Regular,Book
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-BoldOblique.ttf: DejaVu Sans:style=Bold Oblique
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono.ttf: DejaVu Sans Mono:style=Regular,Book
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=SemiBold Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-BoldOblique.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Bold Oblique,Bold Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-Italic.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Italic,Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif.ttf: DejaVu Serif:style=Regular,Book
+/usr/share/fonts/dejavu-serif-fonts/DejaVuMathTeXGyre.ttf: DejaVu Serif,DejaVu Math TeX Gyre:style=Regular
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-BoldItalic.ttf: DejaVu Serif:style=Bold Italic
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-Oblique.ttf: DejaVu Sans Mono:style=Oblique
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-Bold.ttf: DejaVu Sans Mono:style=Bold
 
-they can't fail us on best practices. it's not a check to make sure a setting is valid. it's a recommendation as to how we should conduct business. and i have no problem taking that up with his mgmt if i have to.
+Why I am seeing this error? 
 
+If you cat /etc/fonts/fonts.conf
 
-- name: ocp4-general-namespaces-in-use
-      rationale: N/A
-    - name: ocp4-rbac-least-privilege
-      rationale: N/A
-    - name: ocp4-rbac-limit-cluster-admin
-      rationale: N/A
-    - name: ocp4-rbac-limit-secrets-access
-      rationale: N/A
-    - name: ocp4-accounts-unique-service-account
-      rationale: N/A
+In that u will be seeing something like this - 
 
+<!-- Font cache directory list -->
 
-- name: ocp4-general-namespaces-in-use
-  rationale: This rule is a best practice recommendation and not a mandatory compliance check. We manage namespaces according to our internal policies and procedures.
+        <cachedir>/usr/lib/fontconfig/cache</cachedir>
+        <cachedir prefix="xdg">fontconfig</cachedir>
+        <!-- the following element will be removed in the future -->
+        <cachedir>~/.fontconfig</cachedir>
 
-- name: ocp4-rbac-least-privilege
-  rationale: This rule is a best practice recommendation. We manage RBAC through ADOM/RBAC to ensure least-privilege access is maintained.
+        <config>
+So here the cache is being written to home directory, but the home directory is read only and not writable so we are facing this issue.
 
-- name: ocp4-rbac-limit-cluster-admin
-  rationale: This rule is a best practice recommendation. We manage cluster admin access via ADOM/RBAC, ensuring that only necessary users and groups have cluster-admin access.
+What I have done to resolve this issue?
 
-- name: ocp4-rbac-limit-secrets-access
-  rationale: This rule is a best practice recommendation. We manage access to secrets through ADOM/RBAC, providing two RBAC levels: namespace admin and developer. Admins can manage secrets within their namespace only, while developers cannot see secrets.
+I have followed the below steps ->
 
-- name: ocp4-accounts-unique-service-account
-  rationale: This rule is a best practice recommendation. We manage service accounts according to our internal policies and procedures to ensure unique service accounts are used where necessary.
+cp /etc/fonts/fonts.conf /tmp/fonts.conf 
+sed -i 's|~/.fontconfig|/tmp/fontconfig-cache|g' /tmp/fonts.conf
+export FONTCONFIG_FILE=fonts.conf
+export FONTCONFIG_PATH=/tmp
 
+1. Copied the fonts.conf to /tmp.
+2. Using sed command I have edited the writable cache directory pointing to /tmp/fontconfig-cache instead of home directory.
+3. Exported the changed conf file as env variable.
 
+By following the above steps I am able to resolve the issue.
 
+sh-5.2$ fc-list
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Medium
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-ExtraLight.ttf: DejaVu Sans,DejaVu Sans Light:style=ExtraLight
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-BoldOblique.ttf: DejaVu Sans Mono:style=Bold Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-Bold.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Bold,Bold
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=SemiBold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Bold Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed,Book
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-Bold.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Bold,Bold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-Bold.ttf: DejaVu Serif:style=Bold
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Oblique.ttf: DejaVu Sans:style=Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-BoldItalic.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Bold Italic,Bold Italic
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-Oblique.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Oblique,Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed,Book
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Bold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Medium Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-Italic.ttf: DejaVu Serif:style=Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Bold.ttf: DejaVu Sans:style=Bold
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Regular
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf: DejaVu Sans:style=Regular,Book
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-BoldOblique.ttf: DejaVu Sans:style=Bold Oblique
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono.ttf: DejaVu Sans Mono:style=Regular,Book
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=SemiBold Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-BoldOblique.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Bold Oblique,Bold Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-Italic.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Italic,Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif.ttf: DejaVu Serif:style=Regular,Book
+/usr/share/fonts/dejavu-serif-fonts/DejaVuMathTeXGyre.ttf: DejaVu Serif,DejaVu Math TeX Gyre:style=Regular
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-BoldItalic.ttf: DejaVu Serif:style=Bold Italic
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-Oblique.ttf: DejaVu Sans Mono:style=Oblique
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-Bold.ttf: DejaVu Sans Mono:style=Bold
 
-
-
-- name: ocp4-accounts-unique-service-account
-  rationale: This rule is a best practice recommendation. We manage service accounts according to our internal policies and procedures to ensure unique service accounts are used where necessary.
-
-- name: ocp4-general-default-namespace-use
-  rationale: Restricted via RBAC. Access to the default namespace is controlled through our RBAC policies to ensure proper usage and prevent unauthorized access.
-
-- name: ocp4-general-namespaces-in-use
-  rationale: This rule is a best practice recommendation. We manage namespaces according to our internal policies and procedures to ensure proper usage and organization.
-
-- name: ocp4-rbac-least-privilege
-  rationale: This rule is a best practice recommendation. We enforce least-privilege access through ADOM/RBAC to ensure users and service accounts have only the permissions they need.
-
-- name: ocp4-rbac-limit-cluster-admin
-  rationale: This rule is a best practice recommendation. Cluster admin access is managed via ADOM/RBAC, ensuring that only necessary users and groups have cluster-admin access, and regular reviews are conducted to maintain security.
-
-- name: ocp4-rbac-limit-secrets-access
-  rationale: This rule is a best practice recommendation. Access to secrets is managed through ADOM/RBAC, with two RBAC levels: namespace admin and developer. Namespace admins can manage secrets within their namespace only, while developers cannot access secrets.
-
-- name: ocp4-rbac-pod-creation-access
-  rationale: Restricted to admin group via RBAC. Pod creation access is controlled through RBAC policies, ensuring that only authorized admin users can create pods.
-
-- name: ocp4-scc-limit-net-raw-capability
-  rationale: Enforced via Gatekeeper k8spspcapabilities policy. We use Gatekeeper policies to enforce restrictions on the NET_RAW capability, preventing containers from using raw sockets.
-
-- name: ocp4-scc-limit-privilege-escalation
-  rationale: Enforced via Gatekeeper k8spspallowprivilegeescalationcontainer policy. We use Gatekeeper policies to prevent privilege escalation within containers, ensuring a secure runtime environment.
-
-- name: ocp4-scc-limit-privileged-containers
-  rationale: Enforced via Gatekeeper k8spspprivilegedcontainer policy. We use Gatekeeper policies to restrict the use of privileged containers, reducing the risk of security breaches.
-
-- name: ocp4-scc-limit-root-containers
-  rationale: Enforced via Gatekeeper k8spspallowedusers policy. We use Gatekeeper policies to limit the use of root containers, ensuring that containers run with the least privileges necessary.
-
-- name: ocp4-audit-profile-set
-  rationale: Not really a failure, just a check of what value is set. This rule is informational and checks the audit profile configuration, which is managed according to our internal policies.
-
-- name: ocp4-ocp-allowed-registries
-  rationale: Enforced via Gatekeeper k8sallowedrepos policy. We use Gatekeeper policies to enforce restrictions on allowed container image registries, ensuring that only trusted sources are used.
-
-- name: ocp4-ocp-allowed-registries-for-import
-  rationale: Enforced via Gatekeeper k8sallowedrepos policy. We use Gatekeeper policies to enforce restrictions on allowed registries for image imports, ensuring that only trusted sources are used.
-
-- name: ocp4-scc-limit-container-allowed-capabilities
-  rationale: Managed via Gatekeeper policy. We use Gatekeeper policies to manage and restrict the capabilities that containers are allowed to use, enhancing security.
-
-- name: ocp4-audit-log-forwarding-enabled
-  rationale: We use elastic-agent instead of clusterlogforwarder. Our audit log forwarding is managed through elastic-agent, providing a robust and flexible logging solution.
+So every time I am doing this locally once the pod is deployed. If the pod restarts as well again i have to run the same commands. So we need a permanent solution to this. Can you please edit the font.conf cache directory path to some writable path as i mentioned?. It wouldn't cause the same issue in future.
