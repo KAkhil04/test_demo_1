@@ -1,61 +1,6 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: fontconfig-config
-data:
-  fonts.conf: |
-    <?xml version="1.0"?>
-    <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-    <fontconfig>
-        <!-- Font cache directory list -->
-        <cachedir>/tmp/fontconfig-cache</cachedir>
-        <cachedir>/usr/lib/fontconfig/cache</cachedir>
-        <cachedir prefix="xdg">fontconfig</cachedir>
-        <!-- Comment out or remove problematic cache directory -->
-        <!-- <cachedir>~/.fontconfig</cachedir> -->
-        <config>
-        </config>
-    </fontconfig>
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: your-app
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: your-app
-  template:
-    metadata:
-      labels:
-        app: your-app
-    spec:
-      containers:
-      - name: your-container
-        image: your-image:latest
-        volumeMounts:
-        - name: fontconfig-storage
-          mountPath: /fontconfig
-        env:
-        - name: FONTCONFIG_FILE
-          value: /fontconfig/fonts.conf
-        - name: FONTCONFIG_PATH
-          value: /fontconfig
-        command: ["/bin/sh", "-c"]
-        args:
-        - |
-          # Copy default fonts.conf to PVC if it doesn't exist
-          if [ ! -f /fontconfig/fonts.conf ]; then
-            cp /etc/fonts/fonts.conf /fontconfig/fonts.conf
-            sed -i 's|~/.fontconfig|/fontconfig/cache|g' /fontconfig/fonts.conf
-            mkdir -p /fontconfig/cache
-          fi
-          # Ensure cache directory permissions
-          chmod -R 777 /fontconfig/cache
-          # Start your application
-          exec your-app-command
-      volumes:
-      - name: fontconfig-storage
-        persistentVolumeClaim:
-          claimName: fontconfig-pvc
+sh-5.2$ fc-cache -fv
+Font directories:
+/usr/lib/fontconfig/cache: not cleaning unwritable cache directory
+/home/corretto/.cache/fontconfig: not cleaning non-existent cache directory
+/mnt/fontconfig-cache: cleaning cache directory
+/usr/bin/fc-cache-64: succeeded
