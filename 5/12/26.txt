@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+    <!-- Font cache directory list -->
+    <cachedir>/usr/lib/fontconfig/cache</cachedir>
+    <cachedir>/tmp/fontconfig-cache</cachedir>
+    <!-- Remove or comment out the read-only cache directory -->
+    <!-- <cachedir>~/.fontconfig</cachedir> -->
+    <config>
+        <!-- Add any additional configuration here if needed -->
+    </config>
+</fontconfig>
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: your-app
+spec:
+  selector:
+    matchLabels:
+      app: your-app
+  template:
+    metadata:
+      labels:
+        app: your-app
+    spec:
+      containers:
+      - name: your-container
+        image: your-image
+        env:
+        - name: FONTCONFIG_FILE
+          value: "/tmp/fonts.conf"
+        - name: FONTCONFIG_PATH
+          value: "/tmp"
+        volumeMounts:
+        - name: fontconfig-config
+          mountPath: "/tmp/fonts.conf"
+          subPath: fonts.conf
+      volumes:
+      - name: fontconfig-config
+        configMap:
+          name: fontconfig-config
+
