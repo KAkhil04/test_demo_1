@@ -1,45 +1,49 @@
-<?xml version="1.0"?>
-<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-<fontconfig>
-    <!-- Font cache directory list -->
-    <cachedir>/usr/lib/fontconfig/cache</cachedir>
-    <cachedir>/tmp/fontconfig-cache</cachedir>
-    <!-- Remove or comment out the read-only cache directory -->
-    <!-- <cachedir>~/.fontconfig</cachedir> -->
-    <config>
-        <!-- Add any additional configuration here if needed -->
-    </config>
-</fontconfig>
-
-
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fontconfig-config
+data:
+  fonts.conf: |
+    <?xml version="1.0"?>
+    <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+    <fontconfig>
+        <!-- Font cache directory list -->
+        <cachedir>/tmp/fontconfig-cache</cachedir>
+        <cachedir>/usr/lib/fontconfig/cache</cachedir>
+        <cachedir prefix="xdg">fontconfig</cachedir>
+        <!-- Comment out or remove problematic cache directory -->
+        <!-- <cachedir>~/.fontconfig</cachedir> -->
+        <config>
+        </config>
+    </fontconfig>
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: your-app
 spec:
-  selector:
-    matchLabels:
-      app: your-app
   template:
-    metadata:
-      labels:
-        app: your-app
     spec:
       containers:
       - name: your-container
-        image: your-image
-        env:
-        - name: FONTCONFIG_FILE
-          value: "/tmp/fonts.conf"
-        - name: FONTCONFIG_PATH
-          value: "/tmp"
+        image: your-image:tag
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            mkdir -p /tmp/fontconfig-cache &&
+            chmod 777 /tmp/fontconfig-cache &&
+            cp /fontconfig-config/fonts.conf /tmp/fonts.conf &&
+            export FONTCONFIG_FILE=/tmp/fonts.conf &&
+            export FONTCONFIG_PATH=/tmp &&
+            exec your-original-command
         volumeMounts:
         - name: fontconfig-config
-          mountPath: "/tmp/fonts.conf"
-          subPath: fonts.conf
+          mountPath: /fontconfig-config
+        - name: fontconfig-cache
+          mountPath: /tmp/fontconfig-cache
       volumes:
       - name: fontconfig-config
         configMap:
           name: fontconfig-config
-
+      - name: fontconfig-cache
+        emptyDir: {}
