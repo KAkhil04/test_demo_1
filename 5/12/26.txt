@@ -22,28 +22,40 @@ kind: Deployment
 metadata:
   name: your-app
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: your-app
   template:
+    metadata:
+      labels:
+        app: your-app
     spec:
       containers:
       - name: your-container
-        image: your-image:tag
+        image: your-image:latest
+        volumeMounts:
+        - name: fontconfig-storage
+          mountPath: /fontconfig
+        env:
+        - name: FONTCONFIG_FILE
+          value: /fontconfig/fonts.conf
+        - name: FONTCONFIG_PATH
+          value: /fontconfig
         command: ["/bin/sh", "-c"]
         args:
-          - |
-            mkdir -p /tmp/fontconfig-cache &&
-            chmod 777 /tmp/fontconfig-cache &&
-            cp /fontconfig-config/fonts.conf /tmp/fonts.conf &&
-            export FONTCONFIG_FILE=/tmp/fonts.conf &&
-            export FONTCONFIG_PATH=/tmp &&
-            exec your-original-command
-        volumeMounts:
-        - name: fontconfig-config
-          mountPath: /fontconfig-config
-        - name: fontconfig-cache
-          mountPath: /tmp/fontconfig-cache
+        - |
+          # Copy default fonts.conf to PVC if it doesn't exist
+          if [ ! -f /fontconfig/fonts.conf ]; then
+            cp /etc/fonts/fonts.conf /fontconfig/fonts.conf
+            sed -i 's|~/.fontconfig|/fontconfig/cache|g' /fontconfig/fonts.conf
+            mkdir -p /fontconfig/cache
+          fi
+          # Ensure cache directory permissions
+          chmod -R 777 /fontconfig/cache
+          # Start your application
+          exec your-app-command
       volumes:
-      - name: fontconfig-config
-        configMap:
-          name: fontconfig-config
-      - name: fontconfig-cache
-        emptyDir: {}
+      - name: fontconfig-storage
+        persistentVolumeClaim:
+          claimName: fontconfig-pvc
