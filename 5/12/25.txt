@@ -1,29 +1,106 @@
+In one of the pod when i tried to fetch fc-list, I have seen the below error.
+sh-5.2$ fc-list
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+Fontconfig error: No writable cache directories
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Medium
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-ExtraLight.ttf: DejaVu Sans,DejaVu Sans Light:style=ExtraLight
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-BoldOblique.ttf: DejaVu Sans Mono:style=Bold Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-Bold.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Bold,Bold
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=SemiBold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Bold Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed,Book
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-Bold.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Bold,Bold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-Bold.ttf: DejaVu Serif:style=Bold
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Oblique.ttf: DejaVu Sans:style=Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-BoldItalic.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Bold Italic,Bold Italic
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-Oblique.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Oblique,Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed,Book
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Bold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Medium Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-Italic.ttf: DejaVu Serif:style=Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Bold.ttf: DejaVu Sans:style=Bold
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Regular
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf: DejaVu Sans:style=Regular,Book
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-BoldOblique.ttf: DejaVu Sans:style=Bold Oblique
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono.ttf: DejaVu Sans Mono:style=Regular,Book
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=SemiBold Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-BoldOblique.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Bold Oblique,Bold Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-Italic.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Italic,Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif.ttf: DejaVu Serif:style=Regular,Book
+/usr/share/fonts/dejavu-serif-fonts/DejaVuMathTeXGyre.ttf: DejaVu Serif,DejaVu Math TeX Gyre:style=Regular
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-BoldItalic.ttf: DejaVu Serif:style=Bold Italic
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-Oblique.ttf: DejaVu Sans Mono:style=Oblique
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-Bold.ttf: DejaVu Sans Mono:style=Bold
 
-<?xml version="1.0"?>
-<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-<fontconfig>
-    <!-- Font cache directory list -->
-    <cachedir>/usr/lib/fontconfig/cache</cachedir>
-    <cachedir>/tmp/fontconfig-cache</cachedir>
-    <!-- Remove or comment out the read-only cache directory -->
-    <!-- <cachedir>~/.fontconfig</cachedir> -->
-    <config>
-        <!-- Add any additional configuration here if needed -->
-    </config>
-</fontconfig>
+Why I am seeing this error? 
 
+If you cat /etc/fonts/fonts.conf
 
+In that u will be seeing something like this - 
 
-\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+<!-- Font cache directory list -->
 
-oc get deployments -A -o custom-columns='NAME:.metadata.name,NAMESPACE:.metadata.namespace,SAToken:.spec.template.spec.automountServiceAccountToken' | grep -i -v 'false' > deployments_to_update.txt
+        <cachedir>/usr/lib/fontconfig/cache</cachedir>
+        <cachedir prefix="xdg">fontconfig</cachedir>
+        <!-- the following element will be removed in the future -->
+        <cachedir>~/.fontconfig</cachedir>
 
-#!/bin/bash
-while read -r line; do
-    NAME=$(echo "$line" | awk '{print $1}')
-    NAMESPACE=$(echo "$line" | awk '{print $2}')
-    echo "Patching deployment $NAME in namespace $NAMESPACE"
-    oc patch deployment "$NAME" -n "$NAMESPACE" --type='merge' -p '{"spec":{"template":{"spec":{"automountServiceAccountToken":false}}}}'
-done < deployments_to_update.txt
+        <config>
+So here the cache is being written to home directory, but the home directory is read only and not writable so we are facing this issue.
 
-oc get deployments -A -o custom-columns='NAME:.metadata.name,NAMESPACE:.metadata.namespace,SAToken:.spec.template.spec.automountServiceAccountToken' | grep -i -v 'false'
+What I have done to resolve this issue?
+
+I have followed the below steps ->
+
+cp /etc/fonts/fonts.conf /tmp/fonts.conf 
+sed -i 's|~/.fontconfig|/tmp/fontconfig-cache|g' /tmp/fonts.conf
+export FONTCONFIG_FILE=fonts.conf
+export FONTCONFIG_PATH=/tmp
+
+1. Copied the fonts.conf to /tmp.
+2. Using sed command I have edited the writable cache directory pointing to /tmp/fontconfig-cache instead of home directory.
+3. Exported the changed conf file as env variable.
+
+By following the above steps I am able to resolve the issue.
+
+sh-5.2$ fc-list
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Medium
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-ExtraLight.ttf: DejaVu Sans,DejaVu Sans Light:style=ExtraLight
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-BoldOblique.ttf: DejaVu Sans Mono:style=Bold Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-Bold.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Bold,Bold
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=SemiBold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Bold Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed,Book
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-Bold.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Bold,Bold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-Bold.ttf: DejaVu Serif:style=Bold
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Oblique.ttf: DejaVu Sans:style=Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-BoldItalic.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Bold Italic,Bold Italic
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-Oblique.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Oblique,Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed,Book
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Bold
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=Medium Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-Italic.ttf: DejaVu Serif:style=Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Bold.ttf: DejaVu Sans:style=Bold
+/usr/share/fonts/google-noto-vf/NotoSans-VF.ttf: Noto Sans:style=Regular
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf: DejaVu Sans:style=Regular,Book
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-BoldOblique.ttf: DejaVu Sans:style=Bold Oblique
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono.ttf: DejaVu Sans Mono:style=Regular,Book
+/usr/share/fonts/google-noto-vf/NotoSans-Italic-VF.ttf: Noto Sans:style=SemiBold Italic
+/usr/share/fonts/dejavu-sans-fonts/DejaVuSansCondensed-BoldOblique.ttf: DejaVu Sans,DejaVu Sans Condensed:style=Condensed Bold Oblique,Bold Oblique
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerifCondensed-Italic.ttf: DejaVu Serif,DejaVu Serif Condensed:style=Condensed Italic,Italic
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif.ttf: DejaVu Serif:style=Regular,Book
+/usr/share/fonts/dejavu-serif-fonts/DejaVuMathTeXGyre.ttf: DejaVu Serif,DejaVu Math TeX Gyre:style=Regular
+/usr/share/fonts/dejavu-serif-fonts/DejaVuSerif-BoldItalic.ttf: DejaVu Serif:style=Bold Italic
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-Oblique.ttf: DejaVu Sans Mono:style=Oblique
+/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono-Bold.ttf: DejaVu Sans Mono:style=Bold
+
+So every time I am doing this locally once the pod is deployed. If the pod restarts as well again i have to run the same commands. So we need a permanent solution to this. Can you please edit the font.conf cache directory path to some writable path as i mentioned?. It wouldn't cause the same issue in future.
