@@ -1,6 +1,18 @@
-sh-5.2$ fc-cache -fv
-Font directories:
-/usr/lib/fontconfig/cache: not cleaning unwritable cache directory
-/home/corretto/.cache/fontconfig: not cleaning non-existent cache directory
-/mnt/fontconfig-cache: cleaning cache directory
-/usr/bin/fc-cache-64: succeeded
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sPSPAllowedUsers
+metadata:
+  name: psp-k8spspallowedusers-runasuser
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups:
+          - ""
+        kinds:
+          - Pod
+    excludedNamespaces: ["appdev-gitops", "bitnami-sealed-secrets", "cert-manager", "community-operators", "default", "grafana", "istio-system", "kiali", "open-cluster-*", "openshift*", "*-operator", "kube-*", "sysdig", "trident", "willitconnect"]
+  parameters:
+    runAsUser:
+      rule: MustRunAsNonRoot
