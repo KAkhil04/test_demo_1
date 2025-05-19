@@ -1,6 +1,6 @@
-# Header with borders
+# Header with borders and updated column name
 printf "\n"
-printf "%-1s %-38s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s\n" "|" "NODE" "|" "ALLOCATABLE" "|" "CAPACITY" "|" "CPU REQUESTS" "|" "CPU LIMITS" "|" "UNREQUESTED CPU" "|"
+printf "%-1s %-38s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s\n" "|" "NODE" "|" "ALLOCATABLE" "|" "CAPACITY" "|" "CPU REQUESTS" "|" "CPU LIMITS" "|" "AVAILABLE CPU" "|"
 printf -- "|----------------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|\n"
 
 # Row data
