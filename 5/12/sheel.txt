@@ -1,18 +1,31 @@
-printf "%-25s %-15s %-15s %-15s %-15s\n" "NODE" "ALLOCATABLE" "CAPACITY" "CPU REQUESTS" "CPU LIMITS"
+printf "%-30s %-30s %-30s %-30s %-30s %-30s\n" "NODE" "ALLOCATABLE" "CAPACITY" "CPU REQUESTS" "CPU LIMITS" "UNREQUESTED CPU"
 
 for node in $(oc get nodes -o name); do
-  # Get node name (strip prefix)
+  # Extract node name
   node_name=$(echo "$node" | cut -d'/' -f2)
 
-  # Get allocatable and capacity CPU
+  # Get allocatable and capacity values
   allocatable=$(oc get node "$node_name" -o jsonpath='{.status.allocatable.cpu}')
   capacity=$(oc get node "$node_name" -o jsonpath='{.status.capacity.cpu}')
 
-  # Get requests and limits from 'Allocated resources'
+  # Get CPU request and limit from 'Allocated resources'
   cpu_line=$(oc describe node "$node_name" | awk '/Allocated resources:/,/Events:/' | grep '^  cpu')
   cpu_requests=$(echo "$cpu_line" | awk '{print $2}')
   cpu_limits=$(echo "$cpu_line" | awk '{print $4}')
 
-  # Print formatted row
-  printf "%-25s %-15s %-15s %-15s %-15s\n" "$node_name" "$allocatable" "$capacity" "$cpu_requests" "$cpu_limits"
+  # Normalize values to millicores for math
+  if [[ "$capacity" == *m ]]; then
+    cap_m=${capacity%m}
+  else
+    cap_m=$((capacity * 1000))
+  fi
+
+  req_m=${cpu_requests%m}
+
+  # Compute unrequested CPU
+  diff_m=$((cap_m - req_m))
+  diff="${diff_m}m"
+
+  # Print row with wider spacing
+  printf "%-30s %-30s %-30s %-30s %-30s %-30s\n" "$node_name" "$allocatable" "$capacity" "$cpu_requests" "$cpu_limits" "$diff"
 done
