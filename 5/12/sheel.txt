@@ -1,0 +1,31 @@
+#!/bin/bash
+# Script to display node details with CPU allocatable, capacity, requests, limits, and capacity-requested difference
+echo "NAME,CPU-ALLOCATABLE,CPU-CAPACITY,CPU-REQUESTED,CPU-LIMITS,CPU-AVAILABLE"
+for node in $(oc get nodes -o name | cut -d'/' -f2); do
+  # Get node describe output
+  describe_output=$(oc describe node $node)
+  
+  # Extract fields
+  cpu_allocatable=$(echo "$describe_output" | grep -A 1 "Allocatable:" | grep "cpu:" | awk '{print $2}')
+  cpu_capacity=$(echo "$describe_output" | grep -A 1 "Capacity:" | grep "cpu:" | awk '{print $2}')
+  cpu_requested=$(echo "$describe_output" | grep -A 5 "Allocated resources:" | grep "cpu:" | head -1 | awk '{print $2}' | sed 's/[^0-9]//g')
+  cpu_limits=$(echo "$describe_output" | grep -A 5 "Allocated resources:" | grep "cpu:" | tail -1 | awk '{print $2}' | sed 's/[^0-9]//g')
+  
+  # Handle empty fields
+  cpu_allocatable=${cpu_allocatable:-0}
+  cpu_capacity=${cpu_capacity:-0}
+  cpu_requested=${cpu_requested:-0}
+  cpu_limits=${cpu_limits:-0}
+  
+  # Calculate CPU available (CPU-CAPACITY - CPU-REQUESTED)
+  # Convert cpu_capacity to milliCPU if needed (e.g., 28 to 28000m)
+  if [[ $cpu_capacity =~ ^[0-9]+$ ]]; then
+    cpu_capacity_m=$((cpu_capacity * 1000))
+  else
+    cpu_capacity_m=$(echo $cpu_capacity | sed 's/m//')
+  fi
+  cpu_available=$((cpu_capacity_m - cpu_requested))
+  
+  # Output in CSV-like format
+  echo "$node,$cpu_allocatable,$cpu_capacity,$cpu_requested,$cpu_limits,$cpu_available"
+done
