@@ -1,54 +1,18 @@
-#!/bin/bash
-# Script to display node details with CPU allocatable, capacity, requests, limits, and capacity-requested difference
-echo "NAME,CPU-ALLOCATABLE,CPU-CAPACITY,CPU-REQUESTED,CPU-LIMITS,CPU-AVAILABLE"
+printf "%-25s %-15s %-15s %-15s %-15s\n" "NODE" "ALLOCATABLE" "CAPACITY" "CPU REQUESTS" "CPU LIMITS"
 
-# Enable debugging
-DEBUG_FILE="debug.txt"
-> $DEBUG_FILE
+for node in $(oc get nodes -o name); do
+  # Get node name (strip prefix)
+  node_name=$(echo "$node" | cut -d'/' -f2)
 
-for node in $(oc get nodes -o name | cut -d'/' -f2); do
-  # Get node describe output
-  describe_output=$(oc describe node $node 2>/dev/null)
-  if [ -z "$describe_output" ]; then
-    echo "Error: Failed to describe node $node" >> $DEBUG_FILE
-    echo "$node,0,0,0,0,0"
-    continue
-  fi
-  
-  # Extract fields
-  cpu_allocatable=$(echo "$describe_output" | grep -A 2 "Allocatable:" | grep -E "cpu:" | awk '{print $2}' | sed 's/[[:space:]]//g')
-  cpu_capacity=$(echo "$describe_output" | grep -A 2 "Capacity:" | grep -E "cpu:" | awk '{print $2}' | sed 's/[[:space:]]//g')
-  # Extract CPU requests and limits from the same line
-  cpu_line=$(echo "$describe_output" | grep -A 10 "Allocated resources:" | grep -E "cpu.*m.*m" | head -1)
-  cpu_requested=$(echo "$cpu_line" | awk '{print $2}' | grep -o '[0-9]*' || echo "0")
-  cpu_limits=$(echo "$cpu_line" | awk '{print $4}' | grep -o '[0-9]*' || echo "0")
-  
-  # Handle empty fields
-  cpu_allocatable=${cpu_allocatable:-0}
-  cpu_capacity=${cpu_capacity:-0}
-  cpu_requested=${cpu_requested:-0}
-  cpu_limits=${cpu_limits:-0}
-  
-  # Log raw parsed values for debugging
-  echo "Node: $node" >> $DEBUG_FILE
-  echo "Raw Allocatable: $cpu_allocatable" >> $DEBUG_FILE
-  echo "Raw Capacity: $cpu_capacity" >> $DEBUG_FILE
-  echo "Raw Requested: $cpu_requested" >> $DEBUG_FILE
-  echo "Raw Limits: $cpu_limits" >> $DEBUG_FILE
-  echo "Raw CPU Line: $cpu_line" >> $DEBUG_FILE
-  
-  # Convert cpu_capacity to milliCPU for calculation
-  if [[ $cpu_capacity =~ ^[0-9]+$ ]]; then
-    cpu_capacity_m=$((cpu_capacity * 1000))
-  else
-    cpu_capacity_m=$(echo $cpu_capacity | sed 's/m//')
-  fi
-  cpu_capacity_m=${cpu_capacity_m:-0}
-  
-  # Calculate CPU available (CPU-CAPACITY - CPU-REQUESTED)
-  cpu_available=$((cpu_capacity_m - cpu_requested))
-  cpu_available=${cpu_available:-0}
-  
-  # Output in CSV-like format
-  echo "$node,$cpu_allocatable,$cpu_capacity,$cpu_requested,$cpu_limits,$cpu_available"
+  # Get allocatable and capacity CPU
+  allocatable=$(oc get node "$node_name" -o jsonpath='{.status.allocatable.cpu}')
+  capacity=$(oc get node "$node_name" -o jsonpath='{.status.capacity.cpu}')
+
+  # Get requests and limits from 'Allocated resources'
+  cpu_line=$(oc describe node "$node_name" | awk '/Allocated resources:/,/Events:/' | grep '^  cpu')
+  cpu_requests=$(echo "$cpu_line" | awk '{print $2}')
+  cpu_limits=$(echo "$cpu_line" | awk '{print $4}')
+
+  # Print formatted row
+  printf "%-25s %-15s %-15s %-15s %-15s\n" "$node_name" "$allocatable" "$capacity" "$cpu_requests" "$cpu_limits"
 done
