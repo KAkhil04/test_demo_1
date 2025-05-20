@@ -1,0 +1,119 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: apache-superset
+  namespace: i85v-dev-dftx
+  labels:
+    project.app: apache-superset
+    project.name: apache-superset
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      project.app: apache-superset
+      project.name: apache-superset
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        project.app: apache-superset
+        project.lob: nts
+        project.name: apache-superset
+        project.vsad: i85v
+      annotations:
+        openshift.openshift.io/restartedAt: '2025-05-01T23:11:14.217Z'
+    spec:
+      volumes:
+        - name: superset-home
+          emptyDir: {}
+        - name: superset-config
+          configMap:
+            name: superset-config
+            defaultMode: 420
+        - name: tmp-volume
+          emptyDir: {}
+        - name: python-packages
+          emptyDir: {}
+      containers:
+        - resources:
+            limits:
+              cpu: '1'
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 500Mi
+          terminationMessagePath: /dev/termination-log
+          name: apache-superset
+          command:
+            - /bin/sh
+            - '-c'
+          env:
+            - name: SUPERSET_CONFIG_PATH
+              value: /app/pythonpath/superset_config.py
+            - name: TMPDIR
+              value: /tmp-writable
+            - name: SUPERSET_STATIC_DIR
+              value: /superset/static
+            - name: POSTGRES_HOST
+              value: nj51spacepgdd1v.nss.vzwnet.com
+            - name: POSTGRES_PORT
+              value: '5432'
+            - name: POSTGRES_DB
+              value: i85v_dbpsc
+            - name: POSTGRES_USER
+              value: i85v_dbpsc__usr
+            - name: POSTGRES_SCHEMA
+              value: i85v_dbpsc
+            - name: POSTGRES_PASSWORD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: dev-tpa-secret
+                  key: PSC-ANLY-DEV-SECRET
+            - name: SQLALCHEMY_DATABASE_URI
+              value: 'postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD_SECRET)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)'
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: 8088
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: superset-home
+              mountPath: /app/superset_home
+            - name: superset-config
+              mountPath: /app/pythonpath/superset_config.py
+              subPath: superset_config.py
+            - name: tmp-volume
+              mountPath: /tmp-writable
+          terminationMessagePolicy: File
+          image: 'i85v-docker-np.oneartifactoryci.verizon.com/apache/superset:latest'
+          args:
+            - |
+              pip install psycopg2-binary --proxy http://proxy.ebiz.verizon.com:80/ && \
+              superset db upgrade && \
+              superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@example.com --password admin && \
+              superset init && \
+              gunicorn -w 2 --timeout 120 -b 0.0.0.0:8088 "superset.app:create_app()"
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext:
+        seLinuxOptions:
+          level: 's0:c32,c4'
+        runAsUser: 1000
+        supplementalGroups:
+          - 1000
+      imagePullSecrets:
+        - name: regsecret
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
