@@ -1,5 +1,5 @@
 printf "\n"
-printf "%-1s %-38s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s\n" "|" "NODE" "|" "ALLOCATABLE CPU" "|" "CAPACITY CPU" "|" "CPU REQUESTS" "|" "CPU LIMITS" "|" "AVAILABLE CPU" "|" "ALLOCATABLE MEMORY" "|" "CAPACITY MEMORY" "|" "MEMORY REQUESTS" "|" "MEMORY LIMITS" "|" "AVAILABLE MEMORY" "|"
+printf "%-1s %-38s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s\n" "|" "NODE" "|" "ALLOCATABLE CPU" "|" "CAPACITY CPU" "|" "CPU REQUESTS" "|" "CPU LIMITS" "|" "AVAILABLE CPU" "|" "ALLOCATABLE MEMORY (GiB)" "|" "CAPACITY MEMORY (GiB)" "|" "MEMORY REQUESTS (GiB)" "|" "MEMORY LIMITS (GiB)" "|" "AVAILABLE MEMORY (GiB)" "|"
 printf -- "|----------------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|\n"
 
 for node in $(oc get nodes -o name); do
