@@ -28,20 +28,27 @@ for node in $(oc get nodes -o name); do
   memory_requests=$(echo "$memory_line" | awk '{print $2}')
   memory_limits=$(echo "$memory_line" | awk '{print $4}')
 
-  if [[ "$allocatable_memory" == *Ki ]]; then
-    alloc_mem_k=${allocatable_memory%Ki}
-    alloc_mem_m=$((alloc_mem_k / 1024))
-  elif [[ "$allocatable_memory" == *Mi ]]; then
-    alloc_mem_m=${allocatable_memory%Mi}
-  elif [[ "$allocatable_memory" == *Gi ]]; then
-    alloc_mem_m=$((allocatable_memory%Gi * 1024))
-  fi
+  # Convert memory to GiB
+  convert_to_gib() {
+    value=$1
+    if [[ "$value" == *Ki ]]; then
+      echo "scale=2; ${value%Ki} / (1024 * 1024)" | bc
+    elif [[ "$value" == *Mi ]]; then
+      echo "scale=2; ${value%Mi} / 1024" | bc
+    elif [[ "$value" == *Gi ]]; then
+      echo "${value%Gi}"
+    else
+      echo "0"
+    fi
+  }
 
-  req_mem_m=${memory_requests%Mi}
-  diff_mem_m=$((alloc_mem_m - req_mem_m))
-  diff_memory="${diff_mem_m}Mi"
+  alloc_mem_gib=$(convert_to_gib "$allocatable_memory")
+  capacity_mem_gib=$(convert_to_gib "$capacity_memory")
+  req_mem_gib=$(convert_to_gib "$memory_requests")
+  limit_mem_gib=$(convert_to_gib "$memory_limits")
+  diff_mem_gib=$(echo "scale=2; $alloc_mem_gib - $req_mem_gib" | bc)
 
-  printf "%-1s %-38s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s\n" "|" "$node_name" "|" "$allocatable_cpu" "|" "$capacity_cpu" "|" "$cpu_requests" "|" "$cpu_limits" "|" "$diff_cpu" "|" "$allocatable_memory" "|" "$capacity_memory" "|" "$memory_requests" "|" "$memory_limits" "|" "$diff_memory" "|"
+  printf "%-1s %-38s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s %-28s %-1s\n" "|" "$node_name" "|" "$allocatable_cpu" "|" "$capacity_cpu" "|" "$cpu_requests" "|" "$cpu_limits" "|" "$diff_cpu" "|" "${alloc_mem_gib}Gi" "|" "${capacity_mem_gib}Gi" "|" "${req_mem_gib}Gi" "|" "${limit_mem_gib}Gi" "|" "${diff_mem_gib}Gi" "|"
 done
 
 printf -- "|----------------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|------------------------------|\n"
