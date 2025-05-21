@@ -20,7 +20,7 @@ EXCLUDE_NS="^(default|kube-descheduler-operator|kube-node-lease|kube-public|kube
 
 while IFS= read -r clustername || [[ -n "$clustername" ]]; do
   echo "Processing cluster: $clustername"
-  oc login "https://api.${clustername}.ebiz.verizon.com:6443" -u kurelak -p 'R@nch0@1234'
+  oc login "https://api.${clustername}.ebiz.xyz.com:6443"
   if [ $? -ne 0 ]; then
     echo "Login failed for $clustername"
     continue
