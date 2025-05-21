@@ -13,27 +13,28 @@ awk -v pat="$EXCLUDE_NS" 'BEGIN {print "NAMESPACE\tPOD NAME\tAUTOMOUNTSERVICEACC
 
 
 ---
-
 #!/bin/bash
 
-
+# Define the full exclude pattern (edit only if you want to add/remove namespaces)
+EXCLUDE_NS="^(default|kube-descheduler-operator|kube-node-lease|kube-public|kube-system|openshift-apiserver|openshift-apiserver-operator|openshift-authentication|openshift-authentication-operator|openshift-cloud-controller-manager|openshift-cloud-controller-manager-operator|openshift-cloud-credential-operator|openshift-cloud-network-config-controller|openshift-cloud-platform-infra|openshift-cluster-csi-drivers|openshift-cluster-machine-approver|openshift-cluster-node-tuning-operator|openshift-cluster-samples-operator|openshift-cluster-storage-operator|openshift-cluster-version|openshift-compliance|openshift-config|openshift-config-managed|openshift-config-operator|openshift-console|openshift-console-operator|openshift-console-user-settings|openshift-controller-manager|openshift-controller-manager-operator|openshift-distributed-tracing|openshift-dns|openshift-dns-operator|openshift-etcd|openshift-etcd-operator|openshift-file-integrity|openshift-gatekeeper-system|openshift-host-network|openshift-image-registry|openshift-infra|openshift-ingress|openshift-ingress-canary|openshift-ingress-operator|openshift-insights|openshift-keda|openshift-kni-infra|openshift-kube-apiserver|openshift-kube-apiserver-operator|openshift-kube-controller-manager|openshift-kube-controller-manager-operator|openshift-kube-scheduler|openshift-kube-scheduler-operator|openshift-kube-storage-version-migrator|openshift-kube-storage-version-migrator-operator|openshift-machine-api|openshift-machine-config-operator|openshift-marketplace|openshift-monitoring|openshift-multus|openshift-network-diagnostics|openshift-network-node-identity|openshift-network-operator|openshift-node|openshift-nutanix-infra|openshift-oauth-apiserver|openshift-openstack-infra|openshift-operator-lifecycle-manager|openshift-operators|openshift-ovirt-infra|openshift-ovn-kubernetes|openshift-route-controller-manager|openshift-service-ca|openshift-service-ca-operator|openshift-user-workload-monitoring|openshift-vertical-pod-autoscaler|openshift-vsphere-infra|sysdig|abinitio-system|appdev-gitops|bitnami-sealed-secrets|blackbox-exporter|cert-manager|cert-manager-operator|community-operators|costmanagement-metrics-operator|global-load-balancer-operator|grafana|group-sync-operator|istio-system|lb-operator|node-observability-operator|open-cluster-management-addon-observability|open-cluster-management-agent|open-cluster-management-agent-addon|openshift|proactive-node-scaling-operator|trident)$"
 
 while IFS= read -r clustername || [[ -n "$clustername" ]]; do
   echo "Processing cluster: $clustername"
-  oc login "https://api.${clustername}.ebiz.verizon.com:6443" -u kurelak -p R@nch0@1234
+  oc login "https://api.${clustername}.ebiz.verizon.com:6443" -u kurelak -p 'R@nch0@1234'
   if [ $? -ne 0 ]; then
     echo "Login failed for $clustername"
     continue
   fi
   oc get pods --all-namespaces -o json | jq -r '
-  (.items // [])[] |
-    [.metadata.namespace, .metadata.name,
-      (if .spec.automountServiceAccountToken == null then "NotDefined"
-       elif .spec.automountServiceAccountToken == true then "True"
-       else "false" end)
-    ]
-  | @tsv' | awk -v pat="$EXCLUDE_NS" 'BEGIN {print "NAMESPACE\tPODNAME\tAUTOMOUNTSERVICEACCOUNTTOKEN"}
-!($1 ~ pat)' | column -t > "${clustername}.csv"
+    (.items // [])[] |
+      [.metadata.namespace, .metadata.name,
+        (if .spec.automountServiceAccountToken == null then "NotDefined"
+         elif .spec.automountServiceAccountToken == true then "True"
+         else "False" end)
+      ]
+    | @tsv' | awk -v pat="$EXCLUDE_NS" 'BEGIN {print "NAMESPACE\tPodName\tAUTOMOUNTSERVICEACCOUNTTOKEN"}
+      !($1 ~ pat)' | column -t > "${clustername}.csv"
 
   echo "Saved: ${clustername}.csv"
 done < input.txt
+
