@@ -38,3 +38,15 @@ while IFS= read -r clustername || [[ -n "$clustername" ]]; do
   echo "Saved: ${clustername}.csv"
 done < input.txt
 
+---
+
+oc get pods --all-namespaces -o json | jq -r '
+  (.items // [])[] |
+    [.metadata.namespace, .metadata.name,
+      (if .spec.automountServiceAccountToken == null then "NotDefined"
+       elif .spec.automountServiceAccountToken == true then "True"
+       else "False" end)
+    ]
+  | @tsv' | awk -v pat="$EXCLUDE_NS" 'BEGIN {print "NAMESPACE,PodName,AUTOMOUNTSERVICEACCOUNTTOKEN"}
+      !($1 ~ pat) {gsub(/\t/, ","); print}' > "${clustername}.csv"
+
