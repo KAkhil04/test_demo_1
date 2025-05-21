@@ -13,3 +13,33 @@ oc get pods --all-namespaces -o json | jq -r '
   | @tsv' | \
 awk -v pat="$EXCLUDE_NS" 'BEGIN {print "NAMESPACE\tPOD NAME\tAUTOMOUNTSERVICEACCOUNTTOKEN"}
 !($1 ~ pat)'
+
+
+
+#!/bin/bash
+
+# Assumes EXCLUDE_NS is already defined in the environment.
+
+while IFS= read -r clustername || [[ -n "$clustername" ]]; do
+  echo "Processing cluster: $clustername"
+  oc login "https://api.${clustername}.ebiz.xyz.com" -u kurelak -p 'R@nch0@1234' --insecure-skip-tls-verify
+  if [ $? -ne 0 ]; then
+    echo "Login failed for $clustername"
+    continue
+  fi
+
+  oc get pods --all-namespaces -o json | jq -r '
+    (.items // [])[] |
+      [.metadata.namespace, .metadata.name,
+        (if .spec.automountServiceAccountToken == null then "not defined"
+         elif .spec.automountServiceAccountToken == true then "true"
+         else "false" end)
+      ]
+    | @csv' | awk -F',' -v pat="$EXCLUDE_NS" 'BEGIN {print "NAMESPACE,POD_NAME,AUTOMOUNTSERVICEACCOUNTTOKEN"}
+      {
+        gsub(/"/, "", $1); gsub(/"/, "", $2); gsub(/"/, "", $3);
+        if ($1 !~ pat) print $1 "," $2 "," $3
+      }' > "${clustername}.csv"
+
+  echo "Saved: ${clustername}.csv"
+done < input.txt
