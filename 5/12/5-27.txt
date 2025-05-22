@@ -107,3 +107,17 @@ sum by(label_beta_kubernetes_io_instance_type, label_node_role_kubernetes_io, la
     )
   )
 )
+
+
+---
+
+
+
+      topk(25, sort_desc(
+        (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+        *
+        on(instance) group_left(role) (
+          label_replace(max by (node) (kube_node_role{role=~".+"}), "instance", "$1", "node", "(.*)")
+        )
+      ))
+    
