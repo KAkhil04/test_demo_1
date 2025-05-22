@@ -1,6 +1,6 @@
 sum by(label_beta_kubernetes_io_instance_type, label_node_role_kubernetes_io, label_kubernetes_io_arch, label_node_openshift_io_os_id, node) (
   cluster:master_nodes
-  * on(instance) group_left(node) max by(instance, node) (
-    node_memory_MemAvailable_bytes / 1099511627776
+  * on(node) group_left() (
+    label_replace(node_memory_MemAvailable_bytes, "node", "$1", "instance", "(.*)") / 1099511627776
   )
 )
