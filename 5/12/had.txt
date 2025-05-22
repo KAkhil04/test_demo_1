@@ -58,3 +58,27 @@ sum by(label_beta_kubernetes_io_instance_type, label_node_role_kubernetes_io, la
     )
   )
 )
+
+---
+
+
+sum by(node_role) (
+  (
+    cluster:master_nodes
+    * on(node) group_left()
+    (label_replace(node_memory_MemAvailable_bytes, "node", "$1", "instance", "(.*)"))
+  )
+  or on(node) (
+    label_replace(cluster:infra_nodes, "node_role", "infra", "", "")
+    * on(node) group_left()
+    (label_replace(node_memory_MemAvailable_bytes, "node", "$1", "instance", "(.*)"))
+  )
+  or on(node) (
+    label_replace(
+      max without(endpoint, instance, job, pod, service) (kube_node_labels),
+      "node_role", "worker", "", ""
+    )
+    * on(node) group_left()
+    (label_replace(node_memory_MemAvailable_bytes, "node", "$1", "instance", "(.*)"))
+  )
+)
