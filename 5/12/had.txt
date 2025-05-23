@@ -118,7 +118,6 @@ sum by(node_role) (
 
 ---
 
-
 sum by(label_beta_kubernetes_io_instance_type, label_node_role_kubernetes_io, label_kubernetes_io_arch, label_node_openshift_io_os_id) (
   (
     cluster:master_nodes
@@ -144,13 +143,17 @@ sum by(label_beta_kubernetes_io_instance_type, label_node_role_kubernetes_io, la
   or on(node) (
     label_replace(cluster:master_nodes, "node_role", "master", "", "")
     * on(node) group_left()
-    (label_replace(node_memory_MemAvailable_bytes/1099511627776, "node", "$1", "instance", "(.*)"))
+    (
+      label_replace(node_memory_MemAvailable_bytes/1099511627776, "node", "$1", "instance", "(.*)")
+    )
   )
   max without(endpoint, instance, job, pod, service)
   (
     kube_node_labels
-  ) * on(node) group_left() max by(node)
+  )
+  * on(node) group_left() max by(node)
   (
     kube_node_status_capacity{resource="memory", unit="byte"}
   )
 )
+
