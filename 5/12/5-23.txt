@@ -1,54 +1,71 @@
             sum by(label_beta_kubernetes_io_instance_type, label_node_role_kubernetes_io, label_kubernetes_io_arch, label_node_openshift_io_os_id) (
+                          (
+                            cluster:master_nodes
+                            * on(node) group_left() max by(node)
+                            (
+                              kube_node_status_capacity{resource="memory", unit="byte"}
+                            )
+                          )
+                          or on(node) (
+                            label_replace(cluster:infra_nodes, "label_node_role_kubernetes_io", "infra", "", "")
+                            * on(node) group_left() max by(node)
+                            (
+                              kube_node_status_capacity{resource="memory", unit="byte"}
+                            )
+                          )
+                          or on(node) (
+                            label_replace(max without(endpoint, instance, job, pod, service)
+                            (
+                              kube_node_labels
+                            ), "label_node_role_kubernetes_io", "worker", "", "")
+                            * on(node) group_left() max by(node)
+                            (
+                              kube_node_status_capacity{resource="memory", unit="byte"}
+                            )
+                          )
+                        )
+          record: 'cluster:memory_capacity:sum'
+        - expr: |
+            sum by(node_role) (
               (
-                cluster:master_nodes
-                * on(node) group_left() max by(node)
-                (
-                  kube_node_status_capacity{resource="memory", unit="byte"}
-                )
+                label_replace(cluster:master_nodes, "node_role", "master", "", "")
+                * on(node) group_left()
+                (label_replace(node_memory_MemAvailable_bytes, "node", "$1", "instance", "(.*)"))
               )
               or on(node) (
-                label_replace(cluster:infra_nodes, "label_node_role_kubernetes_io", "infra", "", "")
-                * on(node) group_left() max by(node)
-                (
-                  kube_node_status_capacity{resource="memory", unit="byte"}
-                )
+                label_replace(cluster:infra_nodes, "node_role", "infra", "", "")
+                * on(node) group_left()
+                (label_replace(node_memory_MemAvailable_bytes, "node", "$1", "instance", "(.*)"))
               )
               or on(node) (
-                max without(endpoint, instance, job, pod, service)
-                (
-                  kube_node_labels
-                ) * on(node) group_left() max by(node)
-                (
-                  kube_node_status_capacity{resource="memory", unit="byte"}
+                label_replace(
+                  max without(endpoint, instance, job, pod, service) (kube_node_labels),
+                  "node_role", "worker", "", ""
                 )
+                * on(node) group_left()
+                (label_replace(node_memory_MemAvailable_bytes, "node", "$1", "instance", "(.*)"))
               )
             )
-
----
-
-sum by(label_beta_kubernetes_io_instance_type, label_node_role_kubernetes_io, label_kubernetes_io_arch, label_node_openshift_io_os_id) (
+          record: 'cluster:memory_available:sum'
+        - expr: |
+            sum by(node_role) (
               (
-                cluster:master_nodes
-                * on(node) group_left() max by(node)
-                (
-                  kube_node_status_capacity{resource="memory", unit="byte"}
-                )
+                label_replace(cluster:master_nodes, "node_role", "master", "", "")
+                * on(node) group_left()
+                (label_replace((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes), "node", "$1", "instance", "(.*)"))
               )
               or on(node) (
-                label_replace(cluster:infra_nodes, "label_node_role_kubernetes_io", "infra", "", "")
-                * on(node) group_left() max by(node)
-                (
-                  kube_node_status_capacity{resource="memory", unit="byte"}
-                )
+                label_replace(cluster:infra_nodes, "node_role", "infra", "", "")
+                * on(node) group_left()
+                (label_replace((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes), "node", "$1", "instance", "(.*)"))
               )
               or on(node) (
-                label_replace(max without(endpoint, instance, job, pod, service)
-                (
-                  kube_node_labels
-                ), "label_node_role_kubernetes_io", "worker", "", "")
-                * on(node) group_left() max by(node)
-                (
-                  kube_node_status_capacity{resource="memory", unit="byte"}
+                label_replace(
+                  max without(endpoint, instance, job, pod, service) (kube_node_labels),
+                  "node_role", "worker", "", ""
                 )
+                * on(node) group_left()
+                (label_replace((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes), "node", "$1", "instance", "(.*)"))
               )
             )
+          record: 'cluster:memory_usage:sum'
