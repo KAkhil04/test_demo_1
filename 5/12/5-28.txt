@@ -1,3 +1,1 @@
-echo -e "Metric\tResourceQuota\tActualUsage" && \
-echo -e "Memory Requests\t$(oc describe resourcequota <resource-quota-name> -n <namespace> | grep 'requests.memory' | awk '{print $2}')\t$(oc adm top pods -n <namespace> | awk '{sum+=$3} END {print sum "Mi"}')" && \
-echo -e "Memory Limits\t$(oc describe resourcequota <resource-quota-name> -n <namespace> | grep 'limits.memory' | awk '{print $2}')\t$(oc adm top pods -n <namespace> | awk '{sum+=$4} END {print sum "Mi"}')"
+oc get pods -n <namespace> -o json | jq '.items[] | {name: .metadata.name, limits: .spec.containers[].resources.limits.memory, requests: .spec.containers[].resources.requests.memory, actual_usage: .status.containerStatuses[].usage.memory}'
