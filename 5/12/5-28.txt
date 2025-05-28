@@ -1,5 +1,28 @@
 oc get pods -n <namespace> -o json | jq '.items[] | {name: .metadata.name, limits: .spec.containers[].resources.limits.memory, requests: .spec.containers[].resources.requests.memory, actual_usage: .status.containerStatuses[].usage.memory}'
+---
+#!/bin/bash
 
+# Set namespace and output file
+NAMESPACE="<namespace>"  # Replace <namespace> with your target namespace
+OUTPUT_FILE="pod_memory_usage.csv"
+
+# Fetch requests and limits using oc and jq
+REQUESTS_LIMITS=$(oc get pods -n $NAMESPACE -o json | jq -r '
+  .items[] |
+  .spec.containers[] as $container |
+  {podName: .metadata.name, containerName: $container.name, requests: ($container.resources.requests.memory // "N/A"), limits: ($container.resources.limits.memory // "N/A")} |
+  [.podName, .containerName, .requests, .limits] | @csv')
+
+# Fetch actual usage using oc adm top pods --containers
+USAGE=$(oc adm top pods -n $NAMESPACE --containers | tail -n +2 | awk '{print $1 "," $2 "," $5}')
+
+# Combine outputs into a CSV file
+echo "POD_NAME,CONTAINER_NAME,REQUEST_MEMORY,LIMIT_MEMORY,USAGE_MEMORY" > $OUTPUT_FILE
+awk 'BEGIN { FS=OFS="," } NR==FNR { usage[$1,$2]=$3; next } { print $1, $2, $3, $4, (usage[$1,$2] ? usage[$1,$2] : "N/A") }' \
+  <(echo "$USAGE") <(echo "$REQUESTS_LIMITS") >> $OUTPUT_FILE
+
+echo "CSV output written to $OUTPUT_FILE"
+---
 #!/bin/bash
 
 # Set namespace
