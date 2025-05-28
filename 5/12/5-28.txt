@@ -2,14 +2,19 @@ oc get pods -n <namespace> -o json | jq '.items[] | {name: .metadata.name, limit
 
 #!/bin/bash
 
-NAMESPACE="<namespace>"  # Replace <namespace> with your namespace
+# Set namespace
+NAMESPACE="<namespace>" # Replace <namespace> with your namespace
 
-# Fetch requests and limits
-REQUESTS_LIMITS=$(oc get pods -n $NAMESPACE -o custom-columns="NAME:.metadata.name,REQUESTS:.spec.containers[*].resources.requests.memory,LIMITS:.spec.containers[*].resources.limits.memory" | column -t)
+# Get pod, container, requests, and limits
+REQUESTS_LIMITS=$(oc get pods -n $NAMESPACE -o json | jq -r '.items[] |
+  .spec.containers[] as $container |
+  {podName: .metadata.name, containerName: $container.name, requests: $container.resources.requests.memory, limits: $container.resources.limits.memory} |
+  [.podName, .containerName, .requests, .limits] | @tsv')
 
-# Fetch actual usage
-USAGE=$(oc adm top pods -n $NAMESPACE | tail -n +2 | awk '{print $1, $3}' | column -t)
+# Get actual usage
+USAGE=$(oc adm top pods -n $NAMESPACE --containers | tail -n +2 | awk '{print $1 "\t" $2 "\t" $5}')
 
-# Combine both outputs
-echo -e "NAME\tREQUESTS\tLIMITS\tUSAGE"
-paste <(echo "$REQUESTS_LIMITS") <(echo "$USAGE") | column -t
+# Prepare output
+echo -e "POD_NAME\tCONTAINER_NAME\tREQUEST_MEMORY\tLIMIT_MEMORY\tUSAGE_MEMORY"
+awk 'NR==FNR{a[$1,$2]=$3; next} {print $1, $2, $3, $4, a[$1,$2]}' \
+  <(echo "$USAGE") <(echo "$REQUESTS_LIMITS") | column -t
