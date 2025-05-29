@@ -4,14 +4,14 @@ declare -A group_map
 
 while read -r resource; do
   # Get Kind and API Group/Version from oc explain
-  output=$(oc explain "$resource" 2>/dev/null | awk '/KIND:/ {kind=$2} /VERSION:/ {version=$2} END { print version "/" kind }')
+  output=$(oc explain "$resource" 2>/dev/null | awk '/KIND:/ {kind=$2} /VERSION:/ {version=$2} /GROUP:/ {group=$2} END { print group "/" version "/" kind }')
   if [[ -n "$output" ]]; then
-    version="${output%%/*}"
-    kind="${output##*/}"
+    group_version="${output%/*/*}"  # Extract group/version (e.g., apiextensions.k8s.io/v1)
+    kind="${output##*/}"           # Extract kind (e.g., Subscription)
 
-    # Validate version and kind before using them as array keys
-    if [[ -n "$version" && -n "$kind" ]]; then
-      group_map["$version"]+="$kind,"
+    # Validate group_version and kind before using them as array keys
+    if [[ -n "$group_version" && -n "$kind" ]]; then
+      group_map["$group_version"]+="$kind,"
     else
       echo "Invalid data for resource: $resource"
     fi
@@ -21,7 +21,7 @@ while read -r resource; do
 done < resources.txt
 
 # Print grouped results
-for version in "${!group_map[@]}"; do
-  kinds=${group_map[$version]%,}  # Remove trailing comma
-  echo "$version: $kinds"
+for group_version in "${!group_map[@]}"; do
+  kinds=${group_map[$group_version]%,}  # Remove trailing comma
+  echo "$group_version: $kinds"
 done
