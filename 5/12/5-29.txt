@@ -1,0 +1,19 @@
+declare -A group_map
+
+while read -r resource; do
+  # Get Kind and API Group/Version from oc explain
+  output=$(oc explain "$resource" 2>/dev/null | awk '/KIND:/ {kind=$2} /VERSION:/ {version=$2} END { print version "/" kind }')
+  if [[ -n "$output" ]]; then
+    version="${output%%/*}"
+    kind="${output##*/}"
+    group_map["$version"]+="$kind,"
+  else
+    echo "Resource not found: $resource"
+  fi
+done < resources.txt
+
+# Print grouped results
+for version in "${!group_map[@]}"; do
+  kinds=${group_map[$version]%,}  # Remove trailing comma
+  echo "$version: $kinds"
+done
