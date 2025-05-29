@@ -46,3 +46,160 @@ done
 8. monitoring.openshift.io: AlertingRule,AlertRelabelConfig
 
 9. metal3.io: BareMetalHost,BMCEventSubscription,FirmwareSchema,HardwareData,HostFirmwareSettings,PreprovisioningImage,Provisioning
+
+
+
+//////
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: custom-cluster-role
+rules:
+  - apiGroups:
+      - "constraints.gatekeeper.sh/v1beta1"
+    resources:
+      - K8sAllowedRepos
+      - K8sBlockNodePort
+      - K8sPSPAllowedUsers
+      - K8sPSPAllowPrivilegeEscalationContainer
+      - K8sPSPCapabilities
+      - K8sPSPCapabilities-imageexception
+      - K8sPSPHostFilesystem
+      - K8sPSPHostFilesystem-imageexception
+      - K8sPSPHostNetworkingPorts
+      - K8sPSPPrivilegedContainer
+      - K8sPSPReadOnlyRootFilesystem
+      - K8sPSPVolumeTypes
+      - vzsec-anonymous
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+      - list
+      - watch
+  - apiGroups:
+      - "networking.istio.io"
+    resources:
+      - DestinationRule
+      - EnvoyFilter
+      - Gateway
+      - ProxyConfig
+      - ServiceEntry
+      - Sidecar
+      - VirtualService
+      - WorkloadEntry
+      - WorkloadGroup
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+      - list
+      - watch
+  - apiGroups:
+      - "grafana.integreatly.org"
+    resources:
+      - GrafanaDashboard
+      - GrafanaDatasource
+      - GrafanaFolder
+      - Grafana
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+      - list
+      - watch
+  - apiGroups:
+      - "monitoring.coreos.com"
+    resources:
+      - AlertmanagerConfig
+      - Alertmanager
+      - PodMonitor
+      - Probe
+      - Prometheus
+      - PrometheusRule
+      - ServiceMonitor
+      - ThanosRuler
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+      - list
+      - watch
+  - apiGroups:
+      - "machineconfiguration.openshift.io"
+    resources:
+      - MachineConfig
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+      - list
+      - watch
+  - apiGroups:
+      - "apps.open-cluster-management.io"
+    resources:
+      - Subscription
+      - SubscriptionStatus
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+      - list
+      - watch
+  - apiGroups:
+      - "controlplane.operator.openshift.io"
+    resources:
+      - PodNetworkConnectivityCheck
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+      - list
+      - watch
+  - apiGroups:
+      - "monitoring.openshift.io"
+    resources:
+      - AlertingRule
+      - AlertRelabelConfig
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+      - list
+      - watch
+  - apiGroups:
+      - "metal3.io"
+    resources:
+      - BareMetalHost
+      - BMCEventSubscription
+      - FirmwareSchema
+      - HardwareData
+      - HostFirmwareSettings
+      - PreprovisioningImage
+      - Provisioning
+    verbs:
+      - get
+      - create
+      - update
+      - delete
+      - patch
+      - list
+      - watch
+
