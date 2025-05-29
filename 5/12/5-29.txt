@@ -25,3 +25,24 @@ for group_version in "${!group_map[@]}"; do
   kinds=${group_map[$group_version]%,}  # Remove trailing comma
   echo "$group_version: $kinds"
 done
+
+
+///////////////////////////////////////////////
+
+1. constraints.gatekeeper.sh/v1beta1: K8sAllowedRepos,K8sBlockNodePort,K8sPSPAllowedUsers,K8sPSPAllowPrivilegeEscalationContainer,K8sPSPCapabilities,K8sPSPCapabilities-imageexception, K8sPSPHostFilesystem,K8sPSPHostFilesystem-imageexception,K8sPSPHostNetworkingPorts,K8sPSPPrivilegedContainer,K8sPSPReadOnlyRootFilesystem,K8sPSPVolumeTypes,vzsec-anonymous
+
+2. networking.istio.io: DestinationRule,EnvoyFilter,Gateway,ProxyConfig,ServiceEntry,Sidecar,VirtualService,WorkloadEntry,WorkloadGroup
+
+3. grafana.integreatly.org: GrafanaDashboard,GrafanaDatasource,GrafanaFolder,Grafana
+
+4. monitoring.coreos.com: AlertmanagerConfig,Alertmanager,PodMonitor,Probe,Prometheus,PrometheusRule,ServiceMonitor,ThanosRuler
+
+5. machineconfiguration.openshift.io: MachineConfig
+
+6. apps.open-cluster-management.io: Subscription,SubscriptionStatus
+
+7. controlplane.operator.openshift.io: PodNetworkConnectivityCheck
+
+8. monitoring.openshift.io: AlertingRule,AlertRelabelConfig
+
+9. metal3.io: BareMetalHost,BMCEventSubscription,FirmwareSchema,HardwareData,HostFirmwareSettings,PreprovisioningImage,Provisioning
