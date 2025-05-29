@@ -1,3 +1,5 @@
+#!/bin/bash
+
 declare -A group_map
 
 while read -r resource; do
@@ -6,7 +8,13 @@ while read -r resource; do
   if [[ -n "$output" ]]; then
     version="${output%%/*}"
     kind="${output##*/}"
-    group_map["$version"]+="$kind,"
+
+    # Validate version and kind before using them as array keys
+    if [[ -n "$version" && -n "$kind" ]]; then
+      group_map["$version"]+="$kind,"
+    else
+      echo "Invalid data for resource: $resource"
+    fi
   else
     echo "Resource not found: $resource"
   fi
